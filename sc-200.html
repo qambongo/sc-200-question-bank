@@ -19,8 +19,10 @@ body { font-family: 'Segoe UI', sans-serif; background: var(--bg); color: var(--
 .progress-bar { width: 100%; height: 6px; background: #e1dfdd; border-radius: 3px; margin-top: 10px; overflow: hidden; }
 .progress-fill { height: 100%; background: var(--primary); transition: width 0.3s; }
 .quiz-card { background: var(--card); padding: 30px; border-radius: 8px; box-shadow: 0 2px 8px rgba(0,0,0,0.08); margin-bottom: 20px; }
+.quiz-card.answer-incorrect { border: 2px solid var(--error); }
 .module-tag { display: inline-block; background: #e1dfdd; padding: 4px 12px; border-radius: 12px; font-size: 0.85rem; font-weight: 600; margin-bottom: 15px; }
 .question-text { font-size: 1.15rem; font-weight: 600; margin-bottom: 25px; line-height: 1.5; }
+.question-text.answer-incorrect { color: var(--error); }
 .options { display: flex; flex-direction: column; gap: 12px; }
 .option { padding: 15px; border: 2px solid #e1dfdd; border-radius: 6px; cursor: pointer; transition: all 0.2s; display: flex; align-items: flex-start; gap: 12px; }
 .option:hover:not(.disabled) { border-color: var(--primary); background: #f0f6ff; }
@@ -35,7 +37,11 @@ body { font-family: 'Segoe UI', sans-serif; background: var(--bg); color: var(--
 .feedback.show { display: block; }
 .feedback.correct { background: #dff6dd; border: 1px solid var(--success); }
 .feedback.incorrect { background: #fde7e9; border: 1px solid var(--error); }
-.feedback-title { font-weight: bold; font-size: 1.1rem; margin-bottom: 15px; }
+.feedback-header { display: flex; align-items: center; justify-content: space-between; gap: 12px; }
+.feedback-title { font-weight: bold; font-size: 1.1rem; }
+.explanation-toggle { min-height: 36px; padding: 6px 12px; background: transparent; color: inherit; border: 1px solid currentColor; font-size: 0.9rem; }
+.explanation-toggle:hover { background: rgba(255,255,255,0.5); }
+.explanations.collapsed { display: none; }
 .explanation-item { margin-bottom: 12px; padding: 10px; background: rgba(255,255,255,0.6); border-radius: 4px; line-height: 1.4; }
 .explanation-item strong { display: block; margin-bottom: 4px; }
 .controls { margin-top: 25px; display: flex; justify-content: flex-end; align-items: center; flex-wrap: wrap; gap: 12px; }
@@ -63,6 +69,8 @@ button { min-height: 44px; padding: 10px 24px; border: none; border-radius: 4px;
   .question-text { font-size: 1.05rem; margin-bottom: 20px; }
   .option { padding: 14px 12px; gap: 10px; }
   .feedback { padding: 15px; }
+  .feedback-header { align-items: flex-start; }
+  .explanation-toggle { flex-shrink: 0; }
   .controls { justify-content: stretch; }
   .save-status { width: 100%; order: -1; }
   .controls button { flex: 1 1 calc(50% - 6px); padding-left: 12px; padding-right: 12px; }
@@ -100,8 +108,11 @@ button { min-height: 44px; padding: 10px 24px; border: none; border-radius: 4px;
     <div class="question-text" id="question-text"></div>
     <div class="options" id="options-container"></div>
     <div class="feedback" id="feedback-container">
-      <div class="feedback-title" id="feedback-title"></div>
-      <div id="explanations-container"></div>
+      <div class="feedback-header">
+        <div class="feedback-title" id="feedback-title"></div>
+        <button class="explanation-toggle hidden" id="explanation-toggle" type="button" aria-expanded="false" aria-controls="explanations-container">Show explanations</button>
+      </div>
+      <div class="explanations collapsed" id="explanations-container"></div>
     </div>
     <div class="controls">
       <span class="save-status" id="save-status" role="status" aria-live="polite"></span>
@@ -1036,7 +1047,14 @@ function loadQuestion() {
     optionsContainer.appendChild(div);
   });
 
+  document.getElementById('quiz-container').classList.remove('answer-incorrect');
+  document.getElementById('question-text').classList.remove('answer-incorrect');
   document.getElementById('feedback-container').className = 'feedback';
+  const explanationToggle = document.getElementById('explanation-toggle');
+  explanationToggle.classList.add('hidden');
+  explanationToggle.setAttribute('aria-expanded', 'false');
+  explanationToggle.textContent = 'Show explanations';
+  document.getElementById('explanations-container').classList.add('collapsed');
   document.getElementById('check-btn').disabled = true;
   document.getElementById('check-btn').classList.remove('hidden');
   document.getElementById('next-btn').classList.add('hidden');
@@ -1083,9 +1101,12 @@ function showAnswerFeedback(q, isCorrect) {
   
   const feedback = document.getElementById('feedback-container');
   feedback.className = `feedback show ${isCorrect ? 'correct' : 'incorrect'}`;
+  document.getElementById('quiz-container').classList.toggle('answer-incorrect', !isCorrect);
+  document.getElementById('question-text').classList.toggle('answer-incorrect', !isCorrect);
   document.getElementById('feedback-title').textContent = isCorrect ? '✓ Correct!' : '✗ Incorrect';
   
   const explanationsContainer = document.getElementById('explanations-container');
+  explanationsContainer.classList.add('collapsed');
   explanationsContainer.innerHTML = '';
   q.o.forEach((opt, index) => {
     const div = document.createElement('div');
@@ -1093,6 +1114,10 @@ function showAnswerFeedback(q, isCorrect) {
     div.innerHTML = `<strong>${String.fromCharCode(65 + index)}. ${opt.substring(3)}</strong>${q.e[index]}`;
     explanationsContainer.appendChild(div);
   });
+  const explanationToggle = document.getElementById('explanation-toggle');
+  explanationToggle.classList.remove('hidden');
+  explanationToggle.setAttribute('aria-expanded', 'false');
+  explanationToggle.textContent = 'Show explanations';
   
   document.getElementById('check-btn').classList.add('hidden');
   document.getElementById('next-btn').classList.remove('hidden');
@@ -1174,6 +1199,13 @@ document.getElementById('module-select').addEventListener('change', event => {
 document.getElementById('check-btn').addEventListener('click', checkAnswer);
 document.getElementById('next-btn').addEventListener('click', nextQuestion);
 document.getElementById('save-btn').addEventListener('click', saveProgress);
+document.getElementById('explanation-toggle').addEventListener('click', () => {
+  const explanations = document.getElementById('explanations-container');
+  const isCollapsed = explanations.classList.toggle('collapsed');
+  const toggle = document.getElementById('explanation-toggle');
+  toggle.setAttribute('aria-expanded', String(!isCollapsed));
+  toggle.textContent = isCollapsed ? 'Show explanations' : 'Hide explanations';
+});
 
 populateModuleSelector();
 if (!restoreProgress()) {
