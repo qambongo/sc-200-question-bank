@@ -6,6 +6,7 @@
 <title>SC-200 Interactive Practice Quiz</title>
 <style>
 :root { --primary: #0078d4; --success: #107c10; --error: #d13438; --bg: #f3f2f1; --card: #ffffff; --text: #323130; }
+* { box-sizing: border-box; }
 body { font-family: 'Segoe UI', sans-serif; background: var(--bg); color: var(--text); margin: 0; padding: 20px; }
 .container { max-width: 1000px; margin: 0 auto; }
 .header { background: var(--card); padding: 20px; border-radius: 8px; box-shadow: 0 2px 4px rgba(0,0,0,0.1); margin-bottom: 20px; display: flex; justify-content: space-between; flex-wrap: wrap; gap: 15px; }
@@ -37,8 +38,8 @@ body { font-family: 'Segoe UI', sans-serif; background: var(--bg); color: var(--
 .feedback-title { font-weight: bold; font-size: 1.1rem; margin-bottom: 15px; }
 .explanation-item { margin-bottom: 12px; padding: 10px; background: rgba(255,255,255,0.6); border-radius: 4px; line-height: 1.4; }
 .explanation-item strong { display: block; margin-bottom: 4px; }
-.controls { margin-top: 25px; display: flex; justify-content: flex-end; gap: 15px; }
-button { padding: 10px 24px; border: none; border-radius: 4px; font-size: 1rem; font-weight: 600; cursor: pointer; transition: background 0.2s; }
+.controls { margin-top: 25px; display: flex; justify-content: flex-end; align-items: center; flex-wrap: wrap; gap: 12px; }
+button { min-height: 44px; padding: 10px 24px; border: none; border-radius: 4px; font-size: 1rem; font-weight: 600; cursor: pointer; transition: background 0.2s; }
 .btn-primary { background: var(--primary); color: white; }
 .btn-primary:hover { background: #106ebe; }
 .btn-primary:disabled { background: #c8c6c4; cursor: not-allowed; }
@@ -49,6 +50,27 @@ button { padding: 10px 24px; border: none; border-radius: 4px; font-size: 1rem; 
 .module-breakdown h3 { margin-top: 0; }
 .module-row { display: flex; justify-content: space-between; padding: 8px 0; border-bottom: 1px solid #e1dfdd; }
 .save-status { color: #605e5c; font-size: 0.9rem; align-self: center; }
+@media (max-width: 600px) {
+  body { padding: 10px; }
+  .header, .quiz-card { padding: 18px; }
+  .header { gap: 12px; }
+  .header > div:first-child { width: 100%; }
+  .header h2 { font-size: 1.35rem; }
+  .module-selector { min-width: 100%; width: 100%; }
+  .module-selector select { width: 100%; }
+  .stats { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 8px 14px; width: 100%; }
+  .stat-item { white-space: nowrap; }
+  .question-text { font-size: 1.05rem; margin-bottom: 20px; }
+  .option { padding: 14px 12px; gap: 10px; }
+  .feedback { padding: 15px; }
+  .controls { justify-content: stretch; }
+  .save-status { width: 100%; order: -1; }
+  .controls button { flex: 1 1 calc(50% - 6px); padding-left: 12px; padding-right: 12px; }
+  .results-card { padding: 25px 18px; }
+  .module-breakdown { padding: 15px; }
+  .module-row { gap: 12px; align-items: flex-start; }
+  .module-row strong { text-align: right; }
+}
 </style>
 </head>
 <body>
