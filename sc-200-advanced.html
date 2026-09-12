@@ -15,6 +15,10 @@ body { font-family: 'Segoe UI', sans-serif; background: var(--bg); color: var(--
 .filter-group label { font-size: 0.85rem; font-weight: 600; color: #605e5c; }
 .filter-group select { padding: 10px 12px; border: 2px solid #e1dfdd; border-radius: 4px; background: var(--card); color: var(--text); font: inherit; }
 .filter-group select:focus { outline: 2px solid var(--primary); outline-offset: 1px; }
+.bank-selector { display: flex; flex-direction: column; gap: 6px; min-width: min(100%, 220px); }
+.bank-selector label { font-size: 0.85rem; font-weight: 600; color: #605e5c; }
+.bank-selector select { padding: 10px 12px; border: 2px solid #e1dfdd; border-radius: 4px; background: var(--card); color: var(--text); font: inherit; }
+.bank-selector select:focus { outline: 2px solid var(--primary); outline-offset: 1px; }
 .stats { display: flex; gap: 20px; font-weight: 600; align-items: flex-start; }
 .stat-item span { color: var(--primary); font-size: 1.2rem; }
 .progress-bar { width: 100%; height: 6px; background: #e1dfdd; border-radius: 3px; margin-top: 10px; overflow: hidden; }
@@ -79,6 +83,8 @@ button { min-height: 44px; padding: 10px 24px; border: none; border-radius: 4px;
   body { padding: 10px; }
   .header, .quiz-card { padding: 18px; }
   .header { gap: 12px; }
+  .bank-selector { min-width: 100%; width: 100%; }
+  .bank-selector select { width: 100%; }
   .filters { width: 100%; }
   .filter-group { min-width: 100%; width: 100%; }
   .filter-group select { width: 100%; }
@@ -105,6 +111,13 @@ button { min-height: 44px; padding: 10px 24px; border: none; border-radius: 4px;
     <div>
       <h2 style="margin:0;">SC-200 Advanced Practice Quiz</h2>
       <div style="color: #605e5c; font-size: 0.9rem;">Microsoft Security Operations Analyst — scenario &amp; reasoning bank</div>
+    </div>
+    <div class="bank-selector">
+      <label for="bank-select">Question bank</label>
+      <select id="bank-select">
+        <option value="sc-200.html">Standard bank (906 questions)</option>
+        <option value="sc-200-advanced.html">Advanced bank (285 questions)</option>
+      </select>
     </div>
     <div class="filters">
       <div class="filter-group">
@@ -571,6 +584,10 @@ function restartQuiz() {
 document.getElementById('module-select').addEventListener('change', event => {
   selectedModule = event.target.value;
   restartQuiz();
+});
+document.getElementById('bank-select').value = 'sc-200-advanced.html';
+document.getElementById('bank-select').addEventListener('change', event => {
+  window.location.href = event.target.value;
 });
 document.getElementById('category-select').addEventListener('change', event => {
   selectedCategory = event.target.value;
