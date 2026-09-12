@@ -121,6 +121,7 @@ button { min-height: 44px; padding: 10px 24px; border: none; border-radius: 4px;
       <button class="btn-primary" id="save-btn" type="button">Save Progress</button>
       <button class="btn-primary" id="check-btn" disabled>Check Answer</button>
       <button class="btn-secondary" id="skip-btn" type="button">Skip Question</button>
+      <button class="btn-secondary" id="previous-btn" type="button">Previous Question</button>
       <button class="btn-primary hidden" id="next-btn">Next Question</button>
     </div>
   </div>
@@ -935,6 +936,7 @@ let answered = false;
 let moduleScores = {};
 let selectedModule = 'all';
 let activeQuestions = [];
+let questionStates = {};
 const progressStorageKey = 'sc-200-quiz-progress';
 
 function getModuleNames() {
@@ -975,6 +977,7 @@ function saveProgress() {
     incorrectCount,
     selectedOption,
     answered,
+    questionStates,
     moduleScores,
     selectedModule
   };
@@ -1023,6 +1026,16 @@ function restoreProgress() {
   incorrectCount = Number.isInteger(savedProgress.incorrectCount) ? savedProgress.incorrectCount : 0;
   selectedOption = Number.isInteger(savedProgress.selectedOption) ? savedProgress.selectedOption : null;
   answered = savedProgress.answered === true;
+  questionStates = savedProgress.questionStates && typeof savedProgress.questionStates === 'object'
+    ? savedProgress.questionStates
+    : {};
+  if (!questionStates[currentQuestion]
+      && (savedProgress.answered === true || Number.isInteger(savedProgress.selectedOption))) {
+    questionStates[currentQuestion] = {
+      selectedOption,
+      answered
+    };
+  }
   moduleScores = savedProgress.moduleScores && typeof savedProgress.moduleScores === 'object'
     ? savedProgress.moduleScores
     : {};
@@ -1033,6 +1046,11 @@ function restoreProgress() {
 
 function loadQuestion() {
   const q = activeQuestions[currentQuestion];
+  const savedState = questionStates[currentQuestion];
+  selectedOption = savedState && Number.isInteger(savedState.selectedOption)
+    ? savedState.selectedOption
+    : null;
+  answered = savedState?.answered === true;
   
   document.getElementById('current-q').textContent = currentQuestion + 1;
   document.getElementById('total-q').textContent = activeQuestions.length;
@@ -1047,6 +1065,7 @@ function loadQuestion() {
     div.className = 'option';
     div.innerHTML = `<span class="option-letter">${String.fromCharCode(65 + index)}.</span> <span>${opt.substring(3)}</span>`;
     div.onclick = () => selectOption(index, div);
+    if (!answered && selectedOption === index) div.classList.add('selected');
     optionsContainer.appendChild(div);
   });
 
@@ -1058,9 +1077,10 @@ function loadQuestion() {
   explanationToggle.setAttribute('aria-expanded', 'false');
   explanationToggle.textContent = 'Show explanations';
   document.getElementById('explanations-container').classList.add('collapsed');
-  document.getElementById('check-btn').disabled = true;
+  document.getElementById('check-btn').disabled = selectedOption === null || answered;
   document.getElementById('check-btn').classList.remove('hidden');
   document.getElementById('skip-btn').classList.remove('hidden');
+  document.getElementById('previous-btn').disabled = currentQuestion === 0;
   document.getElementById('next-btn').classList.add('hidden');
   
   updateProgress();
@@ -1083,6 +1103,7 @@ function checkAnswer() {
   answered = true;
   const q = activeQuestions[currentQuestion];
   const isCorrect = selectedOption === q.c;
+  questionStates[currentQuestion] = { selectedOption, answered: true };
   
   if (isCorrect) {
     correctCount++;
@@ -1132,8 +1153,6 @@ function showAnswerFeedback(q, isCorrect) {
 function nextQuestion() {
   if (currentQuestion < activeQuestions.length - 1) {
     currentQuestion++;
-    answered = false;
-    selectedOption = null;
     loadQuestion();
     saveProgress();
   } else {
@@ -1143,6 +1162,7 @@ function nextQuestion() {
 
 function skipQuestion() {
   if (answered) return;
+  delete questionStates[currentQuestion];
   if (currentQuestion < activeQuestions.length - 1) {
     currentQuestion++;
     selectedOption = null;
@@ -1151,6 +1171,13 @@ function skipQuestion() {
   } else {
     showResults();
   }
+}
+
+function previousQuestion() {
+  if (currentQuestion === 0) return;
+  currentQuestion--;
+  loadQuestion();
+  saveProgress();
 }
 
 function updateStats() {
@@ -1197,6 +1224,7 @@ function restartQuiz() {
   incorrectCount = 0;
   selectedOption = null;
   answered = false;
+  questionStates = {};
   moduleScores = {};
   setActiveQuestions();
   initModuleScores();
@@ -1215,6 +1243,7 @@ document.getElementById('module-select').addEventListener('change', event => {
 });
 document.getElementById('check-btn').addEventListener('click', checkAnswer);
 document.getElementById('skip-btn').addEventListener('click', skipQuestion);
+document.getElementById('previous-btn').addEventListener('click', previousQuestion);
 document.getElementById('next-btn').addEventListener('click', nextQuestion);
 document.getElementById('save-btn').addEventListener('click', saveProgress);
 document.getElementById('explanation-toggle').addEventListener('click', () => {
