@@ -49,6 +49,8 @@ button { min-height: 44px; padding: 10px 24px; border: none; border-radius: 4px;
 .btn-primary { background: var(--primary); color: white; }
 .btn-primary:hover { background: #106ebe; }
 .btn-primary:disabled { background: #c8c6c4; cursor: not-allowed; }
+.btn-secondary { background: #edebe9; color: var(--text); }
+.btn-secondary:hover { background: #e1dfdd; }
 .hidden { display: none !important; }
 .results-card { text-align: center; padding: 40px; }
 .score-circle { width: 150px; height: 150px; border-radius: 50%; background: var(--primary); color: white; display: flex; flex-direction: column; justify-content: center; align-items: center; margin: 0 auto 30px; font-size: 2.5rem; font-weight: bold; }
@@ -118,6 +120,7 @@ button { min-height: 44px; padding: 10px 24px; border: none; border-radius: 4px;
       <span class="save-status" id="save-status" role="status" aria-live="polite"></span>
       <button class="btn-primary" id="save-btn" type="button">Save Progress</button>
       <button class="btn-primary" id="check-btn" disabled>Check Answer</button>
+      <button class="btn-secondary" id="skip-btn" type="button">Skip Question</button>
       <button class="btn-primary hidden" id="next-btn">Next Question</button>
     </div>
   </div>
@@ -1057,6 +1060,7 @@ function loadQuestion() {
   document.getElementById('explanations-container').classList.add('collapsed');
   document.getElementById('check-btn').disabled = true;
   document.getElementById('check-btn').classList.remove('hidden');
+  document.getElementById('skip-btn').classList.remove('hidden');
   document.getElementById('next-btn').classList.add('hidden');
   
   updateProgress();
@@ -1120,6 +1124,7 @@ function showAnswerFeedback(q, isCorrect) {
   explanationToggle.textContent = 'Show explanations';
   
   document.getElementById('check-btn').classList.add('hidden');
+  document.getElementById('skip-btn').classList.add('hidden');
   document.getElementById('next-btn').classList.remove('hidden');
   if (currentQuestion === activeQuestions.length - 1) document.getElementById('next-btn').textContent = 'Finish Quiz';
 }
@@ -1128,6 +1133,18 @@ function nextQuestion() {
   if (currentQuestion < activeQuestions.length - 1) {
     currentQuestion++;
     answered = false;
+    selectedOption = null;
+    loadQuestion();
+    saveProgress();
+  } else {
+    showResults();
+  }
+}
+
+function skipQuestion() {
+  if (answered) return;
+  if (currentQuestion < activeQuestions.length - 1) {
+    currentQuestion++;
     selectedOption = null;
     loadQuestion();
     saveProgress();
@@ -1197,6 +1214,7 @@ document.getElementById('module-select').addEventListener('change', event => {
   restartQuiz();
 });
 document.getElementById('check-btn').addEventListener('click', checkAnswer);
+document.getElementById('skip-btn').addEventListener('click', skipQuestion);
 document.getElementById('next-btn').addEventListener('click', nextQuestion);
 document.getElementById('save-btn').addEventListener('click', saveProgress);
 document.getElementById('explanation-toggle').addEventListener('click', () => {
