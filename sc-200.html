@@ -1323,6 +1323,27 @@ const questions = [
   {m:"Automation in Microsoft Sentinel and Microsoft Defender XDR",q:"A new Microsoft Sentinel playbook is failing with an 'Unauthorized' error when attempting to isolate a device, even though it is correctly triggered by an automation rule on incident creation. What is the most likely cause?",o:["A. The automation rule is scoped to low-severity incidents only.","B. The playbook's managed identity lacks the required role assignment to perform the isolation action.","C. The playbook is configured to run manually instead of automatically.","D. The Defender for Endpoint connector has been deprecated."],c:1,e:["Incorrect. The scenario states the playbook is correctly triggered, so the rule's severity scoping is not the cause of an authorization failure.","Correct. Playbooks authenticate using a managed identity; if that identity has not been granted the necessary role (such as a Defender for Endpoint or Sentinel Responder-equivalent permission), the action fails with an Unauthorized error.","Incorrect. The scenario confirms the automation rule is triggering the playbook, meaning it is configured for automatic execution.","Incorrect. The Defender for Endpoint connector remains actively supported; the failure described is an authorization issue, not a deprecated connector."]}
 ];
 
+function seededShuffle(array, seed) {
+  const result = array.slice();
+  let state = seed >>> 0;
+  for (let i = result.length - 1; i > 0; i--) {
+    state = (state * 1664525 + 1013904223) >>> 0;
+    const j = state % (i + 1);
+    [result[i], result[j]] = [result[j], result[i]];
+  }
+  return result;
+}
+
+const EXAM_SET_SIZE = 50;
+const examSets = (() => {
+  const shuffled = seededShuffle(questions, 200914);
+  const sets = [];
+  for (let i = 0; i < shuffled.length; i += EXAM_SET_SIZE) {
+    sets.push(shuffled.slice(i, i + EXAM_SET_SIZE));
+  }
+  return sets;
+})();
+
 // --- QUIZ ENGINE ---
 let currentQuestion = 0;
 let correctCount = 0;
@@ -1341,6 +1362,19 @@ function getModuleNames() {
 
 function populateModuleSelector() {
   const moduleSelect = document.getElementById('module-select');
+
+  if (examSets.length) {
+    const examGroup = document.createElement('optgroup');
+    examGroup.label = 'Exam Mode (mixed, 50/quiz)';
+    examSets.forEach((set, index) => {
+      const option = document.createElement('option');
+      option.value = `exam-${index}`;
+      option.textContent = `Exam ${index + 1} of ${examSets.length} (${set.length} mixed questions)`;
+      examGroup.appendChild(option);
+    });
+    moduleSelect.appendChild(examGroup);
+  }
+
   getModuleNames().forEach(moduleName => {
     const option = document.createElement('option');
     option.value = moduleName;
@@ -1350,6 +1384,11 @@ function populateModuleSelector() {
 }
 
 function setActiveQuestions() {
+  const examMatch = /^exam-(\d+)$/.exec(selectedModule);
+  if (examMatch) {
+    activeQuestions = examSets[Number(examMatch[1])] || [];
+    return;
+  }
   activeQuestions = selectedModule === 'all'
     ? questions
     : questions.filter(q => q.m === selectedModule);
@@ -1401,7 +1440,7 @@ function restoreProgress() {
 
   if (!savedProgress || typeof savedProgress !== 'object') return false;
   if (typeof savedProgress.selectedModule !== 'string') return false;
-  if (savedProgress.selectedModule !== 'all' && !getModuleNames().includes(savedProgress.selectedModule)) return false;
+  if (savedProgress.selectedModule !== 'all' && !getModuleNames().includes(savedProgress.selectedModule) && !/^exam-\d+$/.test(savedProgress.selectedModule)) return false;
 
   selectedModule = savedProgress.selectedModule;
   document.getElementById('module-select').value = selectedModule;
