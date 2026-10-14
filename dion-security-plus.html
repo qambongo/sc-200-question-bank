@@ -1,0 +1,205 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Dion Security+ Practice Bank</title>
+  <style>
+    :root {
+      --bg: #f3f2f1;
+      --card: #ffffff;
+      --text: #201f1e;
+      --muted: #605e5c;
+      --accent: #6b4fbb;
+      --accent-dark: #4d3d8d;
+      --border: #e1dfdd;
+    }
+    * { box-sizing: border-box; }
+    body {
+      font-family: 'Segoe UI', sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      margin: 0;
+      padding: 24px;
+    }
+    .container {
+      max-width: 1100px;
+      margin: 0 auto;
+    }
+    .top-bar {
+      margin-bottom: 18px;
+    }
+    .top-bar a {
+      color: var(--muted);
+      text-decoration: none;
+      font-weight: 600;
+      font-size: 0.9rem;
+    }
+    .header {
+      background: var(--card);
+      border-radius: 12px;
+      padding: 26px 28px;
+      box-shadow: 0 2px 10px rgba(0,0,0,0.08);
+      margin-bottom: 24px;
+      border-top: 6px solid var(--accent);
+    }
+    .header h1 {
+      margin: 0 0 8px;
+      font-size: clamp(1.8rem, 3vw, 2.5rem);
+    }
+    .header p {
+      margin: 0;
+      color: var(--muted);
+      line-height: 1.5;
+    }
+    .module-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+      gap: 20px;
+    }
+    .module-card {
+      background: var(--card);
+      border: 2px solid var(--border);
+      border-radius: 12px;
+      padding: 22px;
+      text-decoration: none;
+      color: inherit;
+      box-shadow: 0 2px 6px rgba(0,0,0,0.04);
+      transition: transform 0.15s, box-shadow 0.15s, border-color 0.15s;
+      display: flex;
+      flex-direction: column;
+      min-height: 180px;
+    }
+    .module-card:hover {
+      transform: translateY(-3px);
+      box-shadow: 0 8px 18px rgba(0,0,0,0.08);
+      border-color: var(--accent);
+    }
+    .module-badge {
+      width: 48px;
+      height: 48px;
+      border-radius: 10px;
+      background: var(--accent);
+      color: #fff;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-weight: 800;
+      font-size: 1rem;
+      margin-bottom: 14px;
+    }
+    .module-card h2 {
+      margin: 0 0 6px;
+      font-size: 1.2rem;
+    }
+    .module-card .subtitle {
+      margin: 0 0 12px;
+      color: var(--muted);
+      font-size: 0.92rem;
+    }
+    .module-card .meta {
+      margin-top: auto;
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+      font-size: 0.8rem;
+      color: var(--muted);
+    }
+    .module-card .meta span {
+      background: #f5f5f5;
+      border-radius: 999px;
+      padding: 5px 10px;
+    }
+    .cta {
+      margin-top: 12px;
+      color: var(--accent);
+      font-weight: 700;
+    }
+    @media (max-width: 600px) {
+      body { padding: 16px; }
+      .header { padding: 20px; }
+      .module-card { min-height: unset; }
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <div class="top-bar">
+      <a href="index.html">&larr; All exams</a>
+    </div>
+
+    <header class="header">
+      <h1>Dion Security+ Practice Bank</h1>
+      <p>This is a separate course-based bank from the main Security+ practice set and is sourced from the Dion Udemy course modules.</p>
+    </header>
+
+    <div class="module-grid">
+      <a class="module-card" href="Dion-Questions/1.1%20CompTIA%20Security%2B%20%28SYO-701%29%20%231.html">
+        <div class="module-badge">1.1</div>
+        <h2>CompTIA Security+ #1</h2>
+        <p class="subtitle">Dion Udemy quiz set</p>
+        <div class="meta">
+          <span>Starter set</span>
+          <span>Domain mix</span>
+        </div>
+        <div class="cta">Open quiz &rarr;</div>
+      </a>
+
+      <a class="module-card" href="Dion-Questions/2.2%20CompTIA%20Security%2B%20%28SYO-701%29%20%232.html">
+        <div class="module-badge">2.2</div>
+        <h2>CompTIA Security+ #2</h2>
+        <p class="subtitle">Dion Udemy quiz set</p>
+        <div class="meta">
+          <span>Practice set</span>
+          <span>Mixed topics</span>
+        </div>
+        <div class="cta">Open quiz &rarr;</div>
+      </a>
+
+      <a class="module-card" href="Dion-Questions/3.3%20CompTIA%20Security%2B%20%28SYO-701%29%20%233.html">
+        <div class="module-badge">3.3</div>
+        <h2>CompTIA Security+ #3</h2>
+        <p class="subtitle">Dion Udemy quiz set</p>
+        <div class="meta">
+          <span>Practice set</span>
+          <span>Mixed topics</span>
+        </div>
+        <div class="cta">Open quiz &rarr;</div>
+      </a>
+
+      <a class="module-card" href="Dion-Questions/4.4%20CompTIA%20Security%2B%20%28SYO-701%29%20%234.html">
+        <div class="module-badge">4.4</div>
+        <h2>CompTIA Security+ #4</h2>
+        <p class="subtitle">Dion Udemy quiz set</p>
+        <div class="meta">
+          <span>Practice set</span>
+          <span>Mixed topics</span>
+        </div>
+        <div class="cta">Open quiz &rarr;</div>
+      </a>
+
+      <a class="module-card" href="Dion-Questions/5.5%20CompTIA%20Security%2B%20%28SYO-701%29%20%235.html">
+        <div class="module-badge">5.5</div>
+        <h2>CompTIA Security+ #5</h2>
+        <p class="subtitle">Dion Udemy quiz set</p>
+        <div class="meta">
+          <span>Practice set</span>
+          <span>Mixed topics</span>
+        </div>
+        <div class="cta">Open quiz &rarr;</div>
+      </a>
+
+      <a class="module-card" href="Dion-Questions/6.6%20CompTIA%20Security%2B%20%28SYO-701%29%20%236.html">
+        <div class="module-badge">6.6</div>
+        <h2>CompTIA Security+ #6</h2>
+        <p class="subtitle">Dion Udemy quiz set</p>
+        <div class="meta">
+          <span>Final set</span>
+          <span>Mixed topics</span>
+        </div>
+        <div class="cta">Open quiz &rarr;</div>
+      </a>
+    </div>
+  </div>
+</body>
+</html>
