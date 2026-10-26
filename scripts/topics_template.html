@@ -1,0 +1,1014 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Security+ by Topic</title>
+<style>
+/*__BASE_CSS__*/
+
+/* Account bar and sign-in dialog */
+.account { display: flex; align-items: center; gap: 10px; font-size: 0.9rem; color: var(--muted); flex-wrap: wrap; justify-content: flex-end; }
+.account strong { color: var(--text); }
+.account button { min-height: 34px; padding: 6px 14px; font-size: 0.9rem; }
+.sync-note { font-size: 0.8rem; }
+.sync-note.error { color: var(--error); }
+.overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.45); display: flex; align-items: center; justify-content: center; padding: 16px; z-index: 50; }
+.dialog { background: var(--card); border-radius: 10px; padding: 26px; width: 100%; max-width: 420px; box-shadow: 0 10px 40px rgba(0,0,0,0.25); max-height: 90vh; overflow-y: auto; }
+.dialog h2 { margin: 0 0 6px; font-size: 1.3rem; }
+.dialog p { color: var(--muted); margin: 0 0 16px; font-size: 0.92rem; }
+.dialog label { display: block; font-weight: 600; font-size: 0.9rem; margin: 12px 0 4px; }
+.dialog input { width: 100%; min-height: 42px; padding: 8px 12px; border: 2px solid var(--border); border-radius: 4px; font: inherit; }
+.dialog input:focus { outline: none; border-color: var(--primary); }
+.dialog .form-error { color: var(--error); font-size: 0.88rem; margin-top: 10px; min-height: 1.2em; }
+.dialog .dialog-actions { display: flex; gap: 10px; margin-top: 18px; flex-wrap: wrap; }
+.dialog .dialog-actions button { flex: 1 1 auto; }
+.tabs { display: flex; gap: 4px; background: #edebe9; border-radius: 6px; padding: 4px; margin-bottom: 14px; }
+.tabs button { flex: 1; min-height: 36px; padding: 6px; background: transparent; font-size: 0.92rem; }
+.tabs button.active { background: var(--card); box-shadow: 0 1px 3px rgba(0,0,0,0.12); }
+.set-modes { display: flex; flex-direction: column; gap: 10px; margin-top: 16px; }
+.set-modes button { width: 100%; text-align: left; display: flex; justify-content: space-between; align-items: center; }
+.set-modes button span { font-weight: 400; font-size: 0.85rem; opacity: 0.85; }
+
+/* Topic overview */
+.overview { background: var(--card); border-radius: 10px; padding: 20px 24px; box-shadow: 0 2px 8px rgba(0,0,0,0.08); margin-bottom: 20px; display: flex; gap: 20px; flex-wrap: wrap; align-items: center; justify-content: space-between; }
+.overview-stats { display: flex; gap: 24px; flex-wrap: wrap; }
+.overview-stats div { color: var(--muted); font-size: 0.85rem; }
+.overview-stats strong { display: block; color: var(--text); font-size: 1.35rem; }
+.overview-actions { display: flex; gap: 10px; flex-wrap: wrap; }
+.domain { margin-bottom: 26px; }
+.domain-head { display: flex; justify-content: space-between; align-items: baseline; gap: 12px; flex-wrap: wrap; margin: 0 2px 10px; }
+.domain-head h2 { margin: 0; font-size: 1.15rem; }
+.domain-head .domain-meta { color: var(--muted); font-size: 0.85rem; }
+.objective-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(290px, 1fr)); gap: 14px; }
+.objective { background: var(--card); border: 2px solid var(--border); border-radius: 10px; padding: 16px 18px; display: flex; flex-direction: column; gap: 8px; }
+.objective.complete { border-color: var(--success); }
+.objective h3 { margin: 0; font-size: 1rem; }
+.objective h3 .obj-num { color: var(--primary); margin-right: 6px; }
+.objective .obj-full { color: var(--muted); font-size: 0.82rem; margin: 0; }
+.objective .obj-meta { display: flex; justify-content: space-between; font-size: 0.82rem; color: var(--muted); }
+.mini-bar { height: 6px; background: #e1dfdd; border-radius: 3px; overflow: hidden; display: flex; }
+.mini-bar .ok { background: var(--success); }
+.mini-bar .bad { background: var(--error); }
+.set-chips { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 4px; }
+.set-chip { min-height: 32px; padding: 4px 10px; font-size: 0.8rem; font-weight: 600; border-radius: 16px; background: #f3f2f1; border: 1px solid var(--border); color: var(--text); }
+.set-chip:hover { border-color: var(--primary); background: #fff5f5; }
+.set-chip.started { background: #fff4ce; border-color: #e8c45c; }
+.set-chip.done { background: #dff6dd; border-color: #8fcf8a; }
+.set-chip.done.weak { background: #fde7e9; border-color: #e6a1a8; }
+.src-tag { background: var(--ink) !important; color: #fff; }
+</style>
+</head>
+<body>
+<div class="container">
+  <div class="top-bar">
+    <a href="index.html">&larr; All exams</a>
+    <div class="account" id="account"></div>
+  </div>
+  <div class="brand-header">
+    <div class="brand-badge">S+</div>
+    <div>
+      <h1>Security+ by Topic</h1>
+      <p>SY0-701 &middot; CompTIA and Dion questions grouped by exam objective &middot; Pick a short set to practice</p>
+    </div>
+  </div>
+
+  <!-- TOPICS SCREEN -->
+  <div id="select-screen">
+    <div class="overview">
+      <div class="overview-stats">
+        <div><strong id="ov-answered">0</strong>Answered</div>
+        <div><strong id="ov-accuracy">&ndash;</strong>Accuracy</div>
+        <div><strong id="ov-done">0</strong>Sets complete</div>
+      </div>
+      <div class="overview-actions">
+        <button class="btn-secondary" id="review-wrong-btn" type="button">Redo all incorrect</button>
+      </div>
+    </div>
+    <div id="domain-list"></div>
+  </div>
+
+  <!-- QUIZ SCREEN -->
+  <div class="hidden" id="quiz-screen">
+    <div class="quiz-header">
+      <div class="row">
+        <div class="status-item" id="question-progress-text">Question 1 of 15</div>
+        <div class="status-item" id="progress-percent-text">Progress: 0%</div>
+        <div class="status-item timer" id="timer-display">15:00</div>
+      </div>
+      <div class="progress-bar"><div class="progress-fill" id="progress-fill"></div></div>
+    </div>
+
+    <div class="quiz-card" id="quiz-container">
+      <div class="tag-row">
+        <span class="tag src-tag" id="source-tag"></span>
+        <span class="tag" id="topic-tag"></span>
+        <span class="tag" id="difficulty-tag"></span>
+      </div>
+      <div class="select-hint hidden" id="select-hint"></div>
+      <div class="question-text" id="question-text"></div>
+      <div class="options" id="options-container"></div>
+      <div class="feedback" id="feedback-container">
+        <div class="feedback-header">
+          <div class="feedback-title" id="feedback-title"></div>
+          <button class="explanation-toggle hidden" id="explanation-toggle" type="button" aria-expanded="false" aria-controls="explanations-container">Show explanations</button>
+        </div>
+        <div class="explanations collapsed" id="explanations-container"></div>
+      </div>
+      <div class="controls">
+        <button class="btn-secondary" id="quit-btn" type="button">Save &amp; exit</button>
+        <button class="btn-primary" id="check-btn" disabled>Check Answer</button>
+        <button class="btn-secondary" id="skip-btn" type="button">Skip Question</button>
+        <button class="btn-primary hidden" id="next-btn">Next Question</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- RESULTS SCREEN -->
+  <div class="quiz-card results-card hidden" id="results-screen">
+    <div class="status-pill" id="status-pill">Completed</div>
+    <h2 id="results-module-name">Set Results</h2>
+    <div class="score-circle">
+      <span id="final-percent">0%</span>
+      <small style="font-size: 1rem; font-weight: normal; opacity: 0.9;">Score</small>
+    </div>
+    <div class="stats-grid">
+      <div class="stat-box"><div class="label">Questions</div><div class="value" id="stat-total">0</div></div>
+      <div class="stat-box"><div class="label">Correct</div><div class="value" id="stat-correct">0</div></div>
+      <div class="stat-box"><div class="label">Incorrect</div><div class="value" id="stat-incorrect">0</div></div>
+      <div class="stat-box"><div class="label">Unanswered</div><div class="value" id="stat-unanswered">0</div></div>
+      <div class="stat-box"><div class="label">Time Taken</div><div class="value" id="stat-time-taken">0:00</div></div>
+    </div>
+    <div class="topic-breakdown">
+      <h3>Topic Performance</h3>
+      <div id="topic-rows"></div>
+    </div>
+    <div class="result-actions">
+      <button class="btn-secondary" id="review-btn" type="button">Review Answers</button>
+      <button class="btn-secondary" id="choose-module-btn" type="button">Back to Topics</button>
+      <button class="btn-primary hidden" id="next-set-btn" type="button">Next Set &rarr;</button>
+    </div>
+  </div>
+
+  <!-- REVIEW SCREEN -->
+  <div class="hidden" id="review-screen">
+    <div class="quiz-card" style="text-align:center;">
+      <h2 style="margin-top:0;">Review Answers</h2>
+      <button class="btn-secondary" id="back-to-results-btn" type="button">&larr; Back to Results</button>
+    </div>
+    <div id="review-list"></div>
+  </div>
+</div>
+
+<!-- SIGN-IN DIALOG -->
+<div class="overlay hidden" id="auth-overlay">
+  <form class="dialog" id="auth-form" novalidate>
+    <div class="tabs">
+      <button type="button" class="active" data-mode="login">Sign in</button>
+      <button type="button" data-mode="register">Create account</button>
+    </div>
+    <p id="auth-intro">Sign in to save your progress and pick up where you left off on any device.</p>
+    <label for="auth-username">Username</label>
+    <input id="auth-username" autocomplete="username" maxlength="32" required>
+    <label for="auth-password">Password</label>
+    <input id="auth-password" type="password" autocomplete="current-password" maxlength="200" required>
+    <div class="form-error" id="auth-error" role="alert"></div>
+    <div class="dialog-actions">
+      <button type="button" class="btn-secondary" id="auth-cancel">Cancel</button>
+      <button type="submit" class="btn-primary" id="auth-submit">Sign in</button>
+    </div>
+  </form>
+</div>
+
+<!-- SET DIALOG -->
+<div class="overlay hidden" id="set-overlay">
+  <div class="dialog">
+    <h2 id="set-title"></h2>
+    <p id="set-desc"></p>
+    <div class="set-modes" id="set-modes"></div>
+    <div class="dialog-actions">
+      <button type="button" class="btn-secondary" id="set-cancel">Cancel</button>
+    </div>
+  </div>
+</div>
+
+<script>
+/*__DATA__*/
+const TIME_PER_QUESTION_SECONDS = 60;
+const QUESTION_BY_ID = Object.fromEntries(questions.map(q => [q.id, q]));
+const OBJECTIVE_BY_ID = Object.fromEntries(OBJECTIVES.map(o => [o.id, o]));
+
+/* ---------- Progress storage ----------
+   progress maps question id -> "1:<unix seconds>" (correct) or "0:<unix seconds>" (incorrect).
+   Signed-in users sync to /api/progress; everyone also keeps a copy in localStorage. */
+let user = null;          // { username } when signed in
+let progress = {};
+let pending = {};         // answers not yet saved to the server
+let flushTimer = null;
+let syncState = 'local';  // 'local' | 'ok' | 'error' | 'offline'
+
+function storageKey() { return 'sp-topics-progress:' + (user ? user.username : 'guest'); }
+function loadLocal(key) {
+  try { return JSON.parse(localStorage.getItem(key) || '{}') || {}; } catch (e) { return {}; }
+}
+function saveLocal() {
+  try { localStorage.setItem(storageKey(), JSON.stringify(progress)); } catch (e) {}
+}
+
+async function api(path, options = {}) {
+  const res = await fetch(path, {
+    credentials: 'same-origin',
+    headers: options.body ? { 'Content-Type': 'application/json' } : {},
+    ...options,
+  });
+  let data = {};
+  try { data = await res.json(); } catch (e) {}
+  if (!res.ok) {
+    const err = new Error(data.error || `Request failed (${res.status})`);
+    err.status = res.status;
+    throw err;
+  }
+  return data;
+}
+
+function recordResult(qid, correct) {
+  const value = `${correct ? 1 : 0}:${Math.floor(Date.now() / 1000)}`;
+  progress[qid] = value;
+  saveLocal();
+  if (user) {
+    pending[qid] = value;
+    clearTimeout(flushTimer);
+    flushTimer = setTimeout(flushPending, 600);
+  }
+}
+
+async function flushPending(keepalive = false) {
+  clearTimeout(flushTimer);
+  if (!user || Object.keys(pending).length === 0) return;
+  const batch = pending;
+  pending = {};
+  try {
+    await api('/api/progress', { method: 'POST', body: JSON.stringify({ set: batch }), keepalive });
+    syncState = 'ok';
+  } catch (e) {
+    pending = { ...batch, ...pending };
+    syncState = 'error';
+    if (e.status === 401) { user = null; progress = loadLocal(storageKey()); renderTopics(); }
+  }
+  renderAccount();
+}
+
+function timestampOf(v) { return Number(String(v).split(':')[1] || 0); }
+
+async function loadServerProgress(mergeGuest) {
+  const data = await api('/api/progress');
+  const server = data.progress || {};
+  const local = { ...loadLocal(storageKey()), ...(mergeGuest ? loadLocal('sp-topics-progress:guest') : {}) };
+  const upload = {};
+  Object.entries(local).forEach(([qid, v]) => {
+    if (QUESTION_BY_ID[qid] && (!server[qid] || timestampOf(v) > timestampOf(server[qid]))) {
+      server[qid] = v;
+      upload[qid] = v;
+    }
+  });
+  progress = server;
+  saveLocal();
+  if (mergeGuest) { try { localStorage.removeItem('sp-topics-progress:guest'); } catch (e) {} }
+  if (Object.keys(upload).length) {
+    pending = { ...upload, ...pending };
+    await flushPending();
+  }
+  syncState = 'ok';
+}
+
+async function initAccount() {
+  try {
+    const me = await api('/api/auth');
+    if (me.username) {
+      user = { username: me.username };
+      progress = loadLocal(storageKey());
+      renderAccount();
+      renderTopics();
+      await loadServerProgress(false);
+    } else {
+      progress = loadLocal(storageKey());
+      syncState = 'local';
+    }
+  } catch (e) {
+    progress = loadLocal(storageKey());
+    syncState = 'offline';
+  }
+  renderAccount();
+  renderTopics();
+}
+
+function renderAccount() {
+  const el = document.getElementById('account');
+  el.innerHTML = '';
+  const note = document.createElement('span');
+  note.className = 'sync-note';
+  if (user) {
+    const who = document.createElement('span');
+    who.append('Signed in as ');
+    const name = document.createElement('strong');
+    name.textContent = user.username;
+    who.append(name);
+    el.append(who);
+    if (syncState === 'error') { note.textContent = 'Not synced, will retry'; note.classList.add('error'); }
+    else note.textContent = Object.keys(pending).length ? 'Saving…' : 'Progress saved';
+    el.append(note);
+    const resetBtn = document.createElement('button');
+    resetBtn.className = 'btn-secondary';
+    resetBtn.textContent = 'Reset progress';
+    resetBtn.onclick = resetProgress;
+    const out = document.createElement('button');
+    out.className = 'btn-secondary';
+    out.textContent = 'Sign out';
+    out.onclick = signOut;
+    el.append(resetBtn, out);
+  } else {
+    note.textContent = syncState === 'offline'
+      ? 'Sign-in unavailable here, progress saved on this device only'
+      : 'Progress saved on this device only';
+    el.append(note);
+    if (syncState !== 'offline') {
+      const btn = document.createElement('button');
+      btn.className = 'btn-primary';
+      btn.textContent = 'Sign in';
+      btn.onclick = () => openAuth('login');
+      el.append(btn);
+    }
+  }
+}
+
+let authMode = 'login';
+function openAuth(mode) {
+  setAuthMode(mode);
+  document.getElementById('auth-error').textContent = '';
+  document.getElementById('auth-password').value = '';
+  document.getElementById('auth-overlay').classList.remove('hidden');
+  document.getElementById('auth-username').focus();
+}
+function closeAuth() { document.getElementById('auth-overlay').classList.add('hidden'); }
+function setAuthMode(mode) {
+  authMode = mode;
+  document.querySelectorAll('#auth-form .tabs button').forEach(b => b.classList.toggle('active', b.dataset.mode === mode));
+  document.getElementById('auth-submit').textContent = mode === 'login' ? 'Sign in' : 'Create account';
+  document.getElementById('auth-password').autocomplete = mode === 'login' ? 'current-password' : 'new-password';
+  document.getElementById('auth-intro').textContent = mode === 'login'
+    ? 'Sign in to save your progress and pick up where you left off on any device.'
+    : 'Choose a username (3-32 letters, numbers, . _ -) and a password of at least 8 characters. Progress from this device is carried over.';
+}
+
+async function submitAuth(e) {
+  e.preventDefault();
+  const username = document.getElementById('auth-username').value.trim();
+  const password = document.getElementById('auth-password').value;
+  const errEl = document.getElementById('auth-error');
+  const submit = document.getElementById('auth-submit');
+  errEl.textContent = '';
+  submit.disabled = true;
+  try {
+    const data = await api('/api/auth', { method: 'POST', body: JSON.stringify({ action: authMode, username, password }) });
+    user = { username: data.username };
+    closeAuth();
+    await loadServerProgress(true);
+  } catch (err) {
+    errEl.textContent = err.message;
+    if (user) syncState = 'error';
+  } finally {
+    submit.disabled = false;
+    renderAccount();
+    renderTopics();
+  }
+}
+
+async function signOut() {
+  await flushPending();
+  try { await api('/api/auth', { method: 'POST', body: JSON.stringify({ action: 'logout' }) }); } catch (e) {}
+  try { localStorage.removeItem(storageKey()); } catch (e) {}
+  user = null;
+  pending = {};
+  progress = loadLocal(storageKey());
+  syncState = 'local';
+  renderAccount();
+  renderTopics();
+}
+
+async function resetProgress() {
+  if (!confirm('Erase all saved answers for this account? This cannot be undone.')) return;
+  try {
+    await api('/api/progress', { method: 'DELETE' });
+    progress = {};
+    pending = {};
+    saveLocal();
+  } catch (e) {
+    alert('Could not reset progress: ' + e.message);
+  }
+  renderAccount();
+  renderTopics();
+}
+
+/* ---------- Topic overview ---------- */
+function statsFor(ids) {
+  let correct = 0, wrong = 0;
+  ids.forEach(id => {
+    const v = progress[id];
+    if (!v) return;
+    if (v[0] === '1') correct++; else wrong++;
+  });
+  return { total: ids.length, correct, wrong, answered: correct + wrong };
+}
+
+function miniBar(s) {
+  const ok = s.total ? (s.correct / s.total) * 100 : 0;
+  const bad = s.total ? (s.wrong / s.total) * 100 : 0;
+  return `<div class="mini-bar"><span class="ok" style="width:${ok}%"></span><span class="bad" style="width:${bad}%"></span></div>`;
+}
+
+function renderTopics() {
+  const all = statsFor(questions.map(q => q.id));
+  document.getElementById('ov-answered').textContent = `${all.answered} / ${all.total}`;
+  document.getElementById('ov-accuracy').textContent = all.answered ? `${Math.round((all.correct / all.answered) * 100)}%` : '–';
+  let doneSets = 0, totalSets = 0;
+  const wrongCount = all.wrong;
+  const wrongBtn = document.getElementById('review-wrong-btn');
+  wrongBtn.textContent = `Redo all incorrect (${wrongCount})`;
+  wrongBtn.disabled = wrongCount === 0;
+
+  const list = document.getElementById('domain-list');
+  list.innerHTML = '';
+  DOMAINS.forEach(d => {
+    const objs = OBJECTIVES.filter(o => o.domain === d.n);
+    const dIds = objs.flatMap(o => o.sets.flat());
+    const ds = statsFor(dIds);
+    const section = document.createElement('section');
+    section.className = 'domain';
+    section.innerHTML = `
+      <div class="domain-head">
+        <h2>${d.n}.0 ${d.name}</h2>
+        <span class="domain-meta">${d.weight}% of exam &middot; ${ds.answered}/${ds.total} answered</span>
+      </div>
+      <div class="objective-grid"></div>`;
+    const grid = section.querySelector('.objective-grid');
+    objs.forEach(o => {
+      const os = statsFor(o.sets.flat());
+      const card = document.createElement('div');
+      card.className = 'objective' + (os.answered === os.total ? ' complete' : '');
+      const acc = os.answered ? ` &middot; ${Math.round((os.correct / os.answered) * 100)}% correct` : '';
+      card.innerHTML = `
+        <h3><span class="obj-num">${o.id}</span>${o.short}</h3>
+        <p class="obj-full">${o.full}</p>
+        ${miniBar(os)}
+        <div class="obj-meta"><span>${os.answered}/${os.total} answered${acc}</span><span>${o.sets.length} sets</span></div>
+        <div class="set-chips"></div>`;
+      const chips = card.querySelector('.set-chips');
+      o.sets.forEach((ids, i) => {
+        const s = statsFor(ids);
+        totalSets++;
+        const chip = document.createElement('button');
+        chip.type = 'button';
+        chip.className = 'set-chip';
+        if (s.answered === s.total) {
+          doneSets++;
+          chip.classList.add('done');
+          if (s.correct / s.total < 0.7) chip.classList.add('weak');
+          chip.textContent = `Set ${i + 1} · ${Math.round((s.correct / s.total) * 100)}%`;
+        } else if (s.answered > 0) {
+          chip.classList.add('started');
+          chip.textContent = `Set ${i + 1} · ${s.answered}/${s.total}`;
+        } else {
+          chip.textContent = `Set ${i + 1} · ${s.total}q`;
+        }
+        chip.onclick = () => openSet(o, i);
+        chips.appendChild(chip);
+      });
+      grid.appendChild(card);
+    });
+    list.appendChild(section);
+  });
+  document.getElementById('ov-done').textContent = `${doneSets} / ${totalSets}`;
+}
+
+function openSet(obj, setIndex) {
+  const ids = obj.sets[setIndex];
+  const s = statsFor(ids);
+  const unanswered = ids.filter(id => !progress[id]);
+  const wrong = ids.filter(id => progress[id] && progress[id][0] === '0');
+  document.getElementById('set-title').textContent = `${obj.id} ${obj.short} · Set ${setIndex + 1} of ${obj.sets.length}`;
+  document.getElementById('set-desc').textContent =
+    `${s.total} questions · ${s.answered} answered · ${s.correct} correct · ${TIME_PER_QUESTION_SECONDS / 60} min per question`;
+  const modes = document.getElementById('set-modes');
+  modes.innerHTML = '';
+  const add = (label, detail, list, primary) => {
+    if (!list.length) return;
+    const b = document.createElement('button');
+    b.type = 'button';
+    b.className = primary ? 'btn-primary' : 'btn-secondary';
+    b.innerHTML = `${label}<span>${detail}</span>`;
+    b.onclick = () => {
+      closeSet();
+      startSession(list, `${obj.id} ${obj.short} · Set ${setIndex + 1}`, { obj: obj.id, set: setIndex });
+    };
+    modes.appendChild(b);
+  };
+  if (unanswered.length && unanswered.length < s.total) add('Continue', `${unanswered.length} left`, unanswered, true);
+  else if (unanswered.length) add('Start set', `${unanswered.length} questions`, unanswered, true);
+  add('Redo incorrect', `${wrong.length} questions`, wrong, !unanswered.length);
+  if (s.answered) add('Restart whole set', `${s.total} questions`, ids, false);
+  document.getElementById('set-overlay').classList.remove('hidden');
+}
+function closeSet() { document.getElementById('set-overlay').classList.add('hidden'); }
+
+function nextSetAfter(origin) {
+  if (!origin) return null;
+  const all = OBJECTIVES.flatMap(o => o.sets.map((ids, set) => ({ obj: o, set, ids })));
+  const start = all.findIndex(s => s.obj.id === origin.obj && s.set === origin.set);
+  for (let k = 1; k < all.length; k++) {
+    const s = all[(start + k) % all.length];
+    if (s.ids.some(id => !progress[id])) return { obj: s.obj, set: s.set };
+  }
+  return null;
+}
+
+/* ---------- Quiz engine (adapted from security-plus.html) ---------- */
+let sessionTitle = '';
+let sessionOrigin = null;
+let activeQuestions = [];
+let currentIndex = 0;
+let selections = {};
+let answeredState = {};
+let matchOptionsCache = {};
+let timerInterval = null;
+let secondsRemaining = 0;
+let totalAllowedSeconds = 0;
+let timeExpired = false;
+
+function shuffleArray(arr) {
+  const result = arr.slice();
+  for (let i = result.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1));
+    [result[i], result[j]] = [result[j], result[i]];
+  }
+  return result;
+}
+
+function escapeAttr(s) {
+  return String(s).replace(/&/g, '&amp;').replace(/"/g, '&quot;');
+}
+
+function formatTime(totalSeconds) {
+  const s = Math.max(0, Math.round(totalSeconds));
+  return `${Math.floor(s / 60)}:${String(s % 60).padStart(2, '0')}`;
+}
+
+function showScreen(id) {
+  ['select-screen', 'quiz-screen', 'results-screen', 'review-screen'].forEach(s =>
+    document.getElementById(s).classList.toggle('hidden', s !== id));
+  window.scrollTo(0, 0);
+}
+
+function startSession(ids, title, origin) {
+  activeQuestions = ids.map(id => QUESTION_BY_ID[id]);
+  sessionTitle = title;
+  sessionOrigin = origin;
+  currentIndex = 0;
+  selections = {};
+  answeredState = {};
+  matchOptionsCache = {};
+  timeExpired = false;
+  totalAllowedSeconds = activeQuestions.length * TIME_PER_QUESTION_SECONDS;
+  secondsRemaining = totalAllowedSeconds;
+  showScreen('quiz-screen');
+  startTimer();
+  loadQuestion();
+}
+
+function startTimer() {
+  updateTimerDisplay();
+  clearInterval(timerInterval);
+  timerInterval = setInterval(() => {
+    secondsRemaining--;
+    updateTimerDisplay();
+    if (secondsRemaining <= 0) {
+      clearInterval(timerInterval);
+      timeExpired = true;
+      finishModule();
+    }
+  }, 1000);
+}
+
+function updateTimerDisplay() {
+  const el = document.getElementById('timer-display');
+  el.textContent = formatTime(secondsRemaining);
+  el.classList.toggle('low', secondsRemaining <= 60);
+}
+
+function updateHeaderStatus() {
+  document.getElementById('question-progress-text').textContent =
+    `Question ${currentIndex + 1} of ${activeQuestions.length}`;
+  const percent = activeQuestions.length === 0 ? 0 : Math.round((currentIndex / activeQuestions.length) * 100);
+  document.getElementById('progress-percent-text').textContent = `Progress: ${percent}%`;
+  document.getElementById('progress-fill').style.width = `${percent}%`;
+}
+
+function loadQuestion() {
+  const q = activeQuestions[currentIndex];
+  const isMulti = q.type === 'multi';
+  const isOrder = q.type === 'order';
+  const isMatch = q.type === 'match';
+  const answered = answeredState[currentIndex] === true;
+
+  updateHeaderStatus();
+
+  document.getElementById('source-tag').textContent = q.src;
+  document.getElementById('topic-tag').textContent = `${q.obj} ${q.top}${q.sub ? ' • ' + q.sub : ''}`;
+  const diffTag = document.getElementById('difficulty-tag');
+  diffTag.textContent = q.d.charAt(0).toUpperCase() + q.d.slice(1);
+  diffTag.className = `tag difficulty-${q.d}`;
+
+  const hint = document.getElementById('select-hint');
+  if (isMulti) {
+    hint.innerHTML = `Select ${numberWord(q.need)}.`;
+    hint.classList.remove('hidden');
+  } else if (isOrder) {
+    hint.innerHTML = `Arrange the steps in the correct order using the arrow buttons.<span class="pbq-badge">PBQ</span>`;
+    hint.classList.remove('hidden');
+  } else if (isMatch) {
+    hint.innerHTML = `Match each item on the left to the correct item on the right.<span class="pbq-badge">PBQ</span>`;
+    hint.classList.remove('hidden');
+  } else {
+    hint.classList.add('hidden');
+  }
+
+  document.getElementById('question-text').textContent = q.q;
+  document.getElementById('question-text').classList.remove('answer-incorrect');
+  document.getElementById('quiz-container').classList.remove('answer-incorrect');
+
+  const optionsContainer = document.getElementById('options-container');
+  optionsContainer.innerHTML = '';
+
+  if (isOrder) {
+    if (!selections[currentIndex]) selections[currentIndex] = shuffleArray(q.steps.map((_, i) => i));
+    renderOrderList(q, answered);
+  } else if (isMatch) {
+    if (!selections[currentIndex]) selections[currentIndex] = new Array(q.pairs.length).fill(null);
+    if (!matchOptionsCache[currentIndex]) matchOptionsCache[currentIndex] = shuffleArray(q.pairs.map(p => p.right));
+    renderMatchList(q, answered);
+  } else {
+    const currentSelections = selections[currentIndex] || [];
+    q.o.forEach((opt, index) => {
+      const div = document.createElement('div');
+      div.className = 'option';
+      div.innerHTML = `<span class="option-letter">${String.fromCharCode(65 + index)}.</span> <span>${opt.substring(3)}</span>`;
+      if (!answered && currentSelections.includes(index)) div.classList.add('selected');
+      div.onclick = () => toggleOption(index, isMulti);
+      optionsContainer.appendChild(div);
+    });
+  }
+
+  document.getElementById('feedback-container').className = 'feedback';
+  const explanationToggle = document.getElementById('explanation-toggle');
+  explanationToggle.classList.add('hidden');
+  explanationToggle.setAttribute('aria-expanded', 'false');
+  explanationToggle.textContent = 'Show explanations';
+  document.getElementById('explanations-container').classList.add('collapsed');
+
+  const checkBtn = document.getElementById('check-btn');
+  checkBtn.classList.remove('hidden');
+  if (isOrder) checkBtn.disabled = false;
+  else if (isMatch) checkBtn.disabled = selections[currentIndex].some(v => !v);
+  else checkBtn.disabled = (selections[currentIndex] || []).length === 0;
+  document.getElementById('skip-btn').classList.remove('hidden');
+  document.getElementById('next-btn').classList.add('hidden');
+
+  if (answered) renderFeedback(q, selections[currentIndex]);
+}
+
+function numberWord(n) {
+  return ({2: 'TWO', 3: 'THREE', 4: 'FOUR'})[n] || String(n);
+}
+
+function toggleOption(index, isMulti) {
+  if (answeredState[currentIndex]) return;
+  const q = activeQuestions[currentIndex];
+  let current = selections[currentIndex] || [];
+  if (isMulti) current = current.includes(index) ? current.filter(i => i !== index) : current.concat(index);
+  else current = [index];
+  selections[currentIndex] = current;
+  const optionEls = document.querySelectorAll('.option');
+  optionEls.forEach(o => o.classList.remove('selected'));
+  current.forEach(i => optionEls[i].classList.add('selected'));
+  document.getElementById('check-btn').disabled = current.length !== (isMulti ? q.need : 1);
+}
+
+function renderOrderList(q, answered) {
+  const container = document.getElementById('options-container');
+  const order = selections[currentIndex];
+  const list = document.createElement('div');
+  list.className = 'order-list';
+  order.forEach((stepIdx, pos) => {
+    const row = document.createElement('div');
+    row.className = 'order-row';
+    row.innerHTML = `
+      <span class="order-pos">${pos + 1}.</span>
+      <span class="order-text">${q.steps[stepIdx]}</span>
+      <span class="order-controls">
+        <button type="button" class="order-btn" data-dir="up" ${pos === 0 || answered ? 'disabled' : ''}>&#9650;</button>
+        <button type="button" class="order-btn" data-dir="down" ${pos === order.length - 1 || answered ? 'disabled' : ''}>&#9660;</button>
+      </span>`;
+    row.querySelectorAll('.order-btn').forEach(btn => { btn.onclick = () => moveOrderItem(pos, btn.dataset.dir); });
+    list.appendChild(row);
+  });
+  container.innerHTML = '';
+  container.appendChild(list);
+}
+
+function moveOrderItem(pos, dir) {
+  if (answeredState[currentIndex]) return;
+  const order = selections[currentIndex];
+  const swapWith = dir === 'up' ? pos - 1 : pos + 1;
+  if (swapWith < 0 || swapWith >= order.length) return;
+  [order[pos], order[swapWith]] = [order[swapWith], order[pos]];
+  renderOrderList(activeQuestions[currentIndex], false);
+}
+
+function renderMatchList(q, answered) {
+  const container = document.getElementById('options-container');
+  const rightOptions = matchOptionsCache[currentIndex];
+  const list = document.createElement('div');
+  list.className = 'match-list';
+  q.pairs.forEach((pair, i) => {
+    const row = document.createElement('div');
+    row.className = 'match-row';
+    const currentVal = selections[currentIndex][i] || '';
+    let optionsHtml = `<option value="" ${currentVal ? '' : 'selected'} disabled>Select a match…</option>`;
+    rightOptions.forEach(opt => {
+      optionsHtml += `<option value="${escapeAttr(opt)}" ${opt === currentVal ? 'selected' : ''}>${opt}</option>`;
+    });
+    row.innerHTML = `
+      <span class="match-left">${pair.left}</span>
+      <select class="match-select" ${answered ? 'disabled' : ''}>${optionsHtml}</select>`;
+    row.querySelector('select').onchange = (e) => setMatchSelection(i, e.target.value);
+    list.appendChild(row);
+  });
+  container.innerHTML = '';
+  container.appendChild(list);
+}
+
+function setMatchSelection(rowIndex, value) {
+  if (answeredState[currentIndex]) return;
+  selections[currentIndex][rowIndex] = value;
+  document.getElementById('check-btn').disabled = selections[currentIndex].some(v => !v);
+}
+
+function isAnswerCorrect(q, selected) {
+  if (q.type === 'order') return selected.every((v, i) => v === i);
+  if (q.type === 'match') return q.pairs.every((p, i) => selected[i] === p.right);
+  const correct = Array.isArray(q.c) ? q.c.slice().sort() : [q.c];
+  const sel = selected.slice().sort();
+  if (correct.length !== sel.length) return false;
+  return correct.every((v, i) => v === sel[i]);
+}
+
+function checkAnswer() {
+  const q = activeQuestions[currentIndex];
+  const selected = selections[currentIndex];
+  if (!selected || answeredState[currentIndex]) return;
+  if (q.type === 'match' && selected.some(v => !v)) return;
+  if ((q.type === 'single' || q.type === 'multi') && selected.length === 0) return;
+  answeredState[currentIndex] = true;
+  recordResult(q.id, isAnswerCorrect(q, selected));
+  renderFeedback(q, selected);
+}
+
+function renderFeedback(q, selected) {
+  const isCorrect = isAnswerCorrect(q, selected);
+
+  if (q.type === 'order') {
+    document.querySelectorAll('.order-row').forEach((row, pos) => {
+      row.classList.add(selected[pos] === pos ? 'correct' : 'incorrect');
+      row.querySelectorAll('button').forEach(b => b.disabled = true);
+    });
+  } else if (q.type === 'match') {
+    document.querySelectorAll('.match-row').forEach((row, i) => {
+      row.querySelector('select').disabled = true;
+      row.classList.add(selected[i] === q.pairs[i].right ? 'correct' : 'incorrect');
+    });
+  } else {
+    const correctSet = Array.isArray(q.c) ? q.c : [q.c];
+    document.querySelectorAll('.option').forEach((opt, index) => {
+      opt.classList.add('disabled');
+      const wasSelected = selected.includes(index);
+      const isCorrectOption = correctSet.includes(index);
+      if (isCorrectOption && wasSelected) opt.classList.add('correct');
+      else if (isCorrectOption && !wasSelected) opt.classList.add('missed');
+      else if (!isCorrectOption && wasSelected) opt.classList.add('incorrect');
+    });
+  }
+
+  document.getElementById('feedback-container').className = `feedback show ${isCorrect ? 'correct' : 'incorrect'}`;
+  document.getElementById('quiz-container').classList.toggle('answer-incorrect', !isCorrect);
+  document.getElementById('question-text').classList.toggle('answer-incorrect', !isCorrect);
+  document.getElementById('feedback-title').textContent = isCorrect ? '✓ Correct!' : '✗ Incorrect';
+
+  const explanationsContainer = document.getElementById('explanations-container');
+  explanationsContainer.classList.add('collapsed');
+  explanationsContainer.innerHTML = explanationsHtml(q);
+  const explanationToggle = document.getElementById('explanation-toggle');
+  explanationToggle.classList.remove('hidden');
+  explanationToggle.setAttribute('aria-expanded', 'false');
+  explanationToggle.textContent = 'Show explanations';
+
+  document.getElementById('check-btn').classList.add('hidden');
+  document.getElementById('skip-btn').classList.add('hidden');
+  document.getElementById('next-btn').classList.remove('hidden');
+  document.getElementById('next-btn').textContent =
+    currentIndex === activeQuestions.length - 1 ? 'Finish Set' : 'Next Question';
+}
+
+function explanationsHtml(q) {
+  if (q.type === 'order') {
+    return q.steps.map((step, i) => `<div class="explanation-item"><strong>${i + 1}. ${step}</strong>${q.e[i]}</div>`).join('');
+  }
+  if (q.type === 'match') {
+    return q.pairs.map((pair, i) => `<div class="explanation-item"><strong>${pair.left} → ${pair.right}</strong>${q.e[i]}</div>`).join('');
+  }
+  return q.o.map((opt, i) =>
+    `<div class="explanation-item"><strong>${String.fromCharCode(65 + i)}. ${opt.substring(3)}</strong>${q.e[i]}</div>`).join('');
+}
+
+function nextQuestion() {
+  if (currentIndex < activeQuestions.length - 1) {
+    currentIndex++;
+    loadQuestion();
+  } else {
+    finishModule();
+  }
+}
+
+function skipQuestion() {
+  if (answeredState[currentIndex]) return;
+  nextQuestion();
+}
+
+function finishModule() {
+  clearInterval(timerInterval);
+  flushPending();
+  showResults();
+}
+
+function computeStats() {
+  let correct = 0, incorrect = 0, unanswered = 0;
+  const topicStats = {};
+  activeQuestions.forEach((q, index) => {
+    const key = `${q.obj} ${OBJECTIVE_BY_ID[q.obj].short}`;
+    if (!topicStats[key]) topicStats[key] = { correct: 0, total: 0 };
+    topicStats[key].total++;
+    const selected = selections[index] || [];
+    if (answeredState[index] !== true || selected.length === 0) { unanswered++; return; }
+    if (isAnswerCorrect(q, selected)) { correct++; topicStats[key].correct++; }
+    else incorrect++;
+  });
+  return { correct, incorrect, unanswered, topicStats };
+}
+
+function showResults() {
+  showScreen('results-screen');
+  const { correct, incorrect, unanswered, topicStats } = computeStats();
+  const total = activeQuestions.length;
+  const answered = correct + incorrect;
+  const percent = answered === 0 ? 0 : Math.round((correct / answered) * 100);
+
+  document.getElementById('results-module-name').textContent = `${sessionTitle} — Results`;
+  document.getElementById('final-percent').textContent = `${percent}%`;
+  document.getElementById('stat-total').textContent = total;
+  document.getElementById('stat-correct').textContent = correct;
+  document.getElementById('stat-incorrect').textContent = incorrect;
+  document.getElementById('stat-unanswered').textContent = unanswered;
+  document.getElementById('stat-time-taken').textContent = formatTime(totalAllowedSeconds - secondsRemaining);
+
+  const pill = document.getElementById('status-pill');
+  pill.textContent = timeExpired ? 'Time Expired' : 'Completed';
+  pill.className = `status-pill ${timeExpired ? 'expired' : 'completed'}`;
+
+  const rows = document.getElementById('topic-rows');
+  rows.innerHTML = '';
+  Object.entries(topicStats).forEach(([topic, stats]) => {
+    const topicPercent = stats.total === 0 ? 0 : Math.round((stats.correct / stats.total) * 100);
+    const row = document.createElement('div');
+    row.className = 'topic-row';
+    row.innerHTML = `
+      <span>${topic}</span>
+      <span class="perf-bar"><span class="perf-fill" style="width:${topicPercent}%;"></span></span>
+      <strong>${stats.correct}/${stats.total} (${topicPercent}%)</strong>`;
+    rows.appendChild(row);
+  });
+
+  const next = nextSetAfter(sessionOrigin);
+  const nextBtn = document.getElementById('next-set-btn');
+  nextBtn.classList.toggle('hidden', !next);
+  if (next) {
+    nextBtn.textContent = `Next: ${next.obj.id} Set ${next.set + 1} →`;
+    nextBtn.onclick = () => openSet(next.obj, next.set);
+  }
+}
+
+function showReview() {
+  showScreen('review-screen');
+  const list = document.getElementById('review-list');
+  list.innerHTML = '';
+  activeQuestions.forEach((q, index) => {
+    const selected = selections[index];
+    const wasAnswered = answeredState[index] === true && !!selected &&
+      (q.type === 'match' ? !selected.some(v => !v) : true);
+    const correct = wasAnswered && isAnswerCorrect(q, selected);
+    let resultLabel = 'Unanswered', resultClass = 'unanswered';
+    if (wasAnswered) {
+      resultLabel = correct ? 'Correct' : 'Incorrect';
+      resultClass = correct ? 'correct' : 'incorrect';
+    }
+
+    let optionsHtml;
+    if (q.type === 'order') {
+      optionsHtml = q.steps.map((step, i) => {
+        let cls = 'option disabled';
+        if (wasAnswered) cls += selected.indexOf(i) === i ? ' correct' : ' incorrect';
+        return `<div class="${cls}"><span class="option-letter">${i + 1}.</span> <span>${step}</span></div>`;
+      }).join('');
+    } else if (q.type === 'match') {
+      optionsHtml = q.pairs.map((pair, i) => {
+        const userVal = wasAnswered ? selected[i] : null;
+        const isRowCorrect = userVal === pair.right;
+        let cls = 'option disabled';
+        if (wasAnswered) cls += isRowCorrect ? ' correct' : ' incorrect';
+        const shown = wasAnswered
+          ? `${pair.left} → your answer: ${userVal}${isRowCorrect ? '' : ' (correct: ' + pair.right + ')'}`
+          : `${pair.left} → not answered (correct: ${pair.right})`;
+        return `<div class="${cls}"><span>${shown}</span></div>`;
+      }).join('');
+    } else {
+      const correctSet = Array.isArray(q.c) ? q.c : [q.c];
+      optionsHtml = q.o.map((opt, i) => {
+        const isCorrectOpt = correctSet.includes(i);
+        const wasSelected = wasAnswered && selected.includes(i);
+        let cls = 'option disabled';
+        if (isCorrectOpt && wasSelected) cls += ' correct';
+        else if (isCorrectOpt && !wasSelected) cls += ' missed';
+        else if (!isCorrectOpt && wasSelected) cls += ' incorrect';
+        return `<div class="${cls}"><span class="option-letter">${String.fromCharCode(65 + i)}.</span> <span>${opt.substring(3)}</span></div>`;
+      }).join('');
+    }
+
+    const item = document.createElement('div');
+    item.className = 'review-item';
+    item.innerHTML = `
+      <div class="review-q-header">
+        <span class="tag">${q.src} · ${q.obj} ${q.top}${q.sub ? ' • ' + q.sub : ''}</span>
+        <span class="review-result ${resultClass}">${resultLabel}</span>
+      </div>
+      <div class="question-text" style="font-size:1.05rem;"></div>
+      <div class="options">${optionsHtml}</div>
+      <div class="explanations" style="margin-top:14px;">${explanationsHtml(q)}</div>`;
+    item.querySelector('.question-text').textContent = `${index + 1}. ${q.q}`;
+    list.appendChild(item);
+  });
+}
+
+function backToTopics() {
+  clearInterval(timerInterval);
+  flushPending();
+  renderTopics();
+  showScreen('select-screen');
+}
+
+document.getElementById('check-btn').addEventListener('click', checkAnswer);
+document.getElementById('skip-btn').addEventListener('click', skipQuestion);
+document.getElementById('next-btn').addEventListener('click', nextQuestion);
+document.getElementById('quit-btn').addEventListener('click', backToTopics);
+document.getElementById('review-btn').addEventListener('click', showReview);
+document.getElementById('choose-module-btn').addEventListener('click', backToTopics);
+document.getElementById('back-to-results-btn').addEventListener('click', () => showScreen('results-screen'));
+document.getElementById('explanation-toggle').addEventListener('click', () => {
+  const explanations = document.getElementById('explanations-container');
+  const isCollapsed = explanations.classList.toggle('collapsed');
+  const toggle = document.getElementById('explanation-toggle');
+  toggle.setAttribute('aria-expanded', String(!isCollapsed));
+  toggle.textContent = isCollapsed ? 'Show explanations' : 'Hide explanations';
+});
+document.getElementById('review-wrong-btn').addEventListener('click', () => {
+  const wrong = questions.filter(q => progress[q.id] && progress[q.id][0] === '0').map(q => q.id);
+  if (wrong.length) startSession(wrong, 'All incorrect answers', null);
+});
+document.querySelectorAll('#auth-form .tabs button').forEach(b => { b.onclick = () => setAuthMode(b.dataset.mode); });
+document.getElementById('auth-form').addEventListener('submit', submitAuth);
+document.getElementById('auth-cancel').addEventListener('click', closeAuth);
+document.getElementById('set-cancel').addEventListener('click', closeSet);
+document.addEventListener('keydown', e => { if (e.key === 'Escape') { closeAuth(); closeSet(); } });
+document.addEventListener('visibilitychange', () => { if (document.visibilityState === 'hidden') flushPending(true); });
+
+renderTopics();
+initAccount();
+</script>
+</body>
+</html>
