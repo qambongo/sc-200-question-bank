@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Security+ by Topic</title>
+<title>__TITLE__</title>
 <style>
 /*__BASE_CSS__*/
 
@@ -66,10 +66,10 @@
     <div class="account" id="account"></div>
   </div>
   <div class="brand-header">
-    <div class="brand-badge">S+</div>
+    <div class="brand-badge">__BADGE__</div>
     <div>
-      <h1>Security+ by Topic</h1>
-      <p>SY0-701 &middot; CompTIA and Dion questions grouped by exam objective &middot; Pick a short set to practice</p>
+      <h1>__TITLE__</h1>
+      <p>__SUBTITLE__</p>
     </div>
   </div>
 
@@ -396,11 +396,11 @@ async function signOut() {
 }
 
 async function resetProgress() {
-  if (!confirm('Erase all saved answers for this account? This cannot be undone.')) return;
+  if (!confirm('Erase your saved answers for this question bank? This cannot be undone.')) return;
+  const ids = questions.map(q => q.id);
   try {
-    await api('/api/progress', { method: 'DELETE' });
-    progress = {};
-    pending = {};
+    await api('/api/progress', { method: 'POST', body: JSON.stringify({ clear: ids }) });
+    ids.forEach(id => { delete progress[id]; delete pending[id]; });
     saveLocal();
   } catch (e) {
     alert('Could not reset progress: ' + e.message);

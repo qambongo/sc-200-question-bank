@@ -1,6 +1,6 @@
 // GET    /api/progress                      -> { progress: { <questionId>: "1:<ts>" | "0:<ts>" } }
 // POST   /api/progress { set: { id: value } } -> saves answers (merged into the stored hash)
-// DELETE /api/progress                      -> erases all saved answers
+// POST   /api/progress { clear: [id, ...] }    -> erases saved answers for those questions
 const { redis, currentUser, send, handler } = require('./_lib/store');
 
 const ID_RE = /^[a-f0-9]{10}$/;
@@ -19,6 +19,14 @@ module.exports = handler(async (req, res) => {
     return send(res, 200, { progress });
   }
 
+  if (req.method === 'POST' && req.body && Array.isArray(req.body.clear)) {
+    const ids = req.body.clear;
+    if (ids.length > MAX_PER_REQUEST) return send(res, 413, { error: 'Too many answers in one request.' });
+    if (!ids.every(id => ID_RE.test(id))) return send(res, 400, { error: 'Invalid progress data.' });
+    if (ids.length) await redis('HDEL', key, ...ids);
+    return send(res, 200, { cleared: ids.length });
+  }
+
   if (req.method === 'POST') {
     const entries = Object.entries((req.body && req.body.set) || {});
     if (entries.length > MAX_PER_REQUEST) return send(res, 413, { error: 'Too many answers in one request.' });
@@ -27,11 +35,6 @@ module.exports = handler(async (req, res) => {
     }
     if (entries.length) await redis('HSET', key, ...entries.flatMap(([id, v]) => [id, String(v)]));
     return send(res, 200, { saved: entries.length });
-  }
-
-  if (req.method === 'DELETE') {
-    await redis('DEL', key);
-    return send(res, 200, { ok: true });
   }
 
   return send(res, 405, { error: 'Method not allowed' });

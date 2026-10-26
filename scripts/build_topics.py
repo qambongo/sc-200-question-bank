@@ -1,5 +1,6 @@
-"""Build security-plus-topics.html: the CompTIA and Dion Security+ banks merged and
-grouped by SY0-701 exam objective, split into small sets.
+"""Build the Security+ "by topic" pages: the CompTIA bank (security-plus-topics.html)
+and the Dion bank (dion-security-plus-topics.html), each grouped by SY0-701 exam
+objective and split into small sets. The banks are kept on separate pages.
 
 Reads the question arrays from security-plus.html and dion-security-plus.html
 (run scripts/build_dion.py first if the Dion files changed), and the page shell
@@ -133,7 +134,7 @@ def dion_objective(q):
     return m.group(1)
 
 
-merged = []
+merged = []  # both banks, tagged with 'src'; split into one page per bank below
 for src, filename, objective_of in (('CompTIA', 'security-plus.html', comptia_objective),
                                      ('Dion', 'dion-security-plus.html', dion_objective)):
     for q in load_questions(filename):
@@ -160,28 +161,48 @@ for q in merged:
     seen.add(qid)
     q['id'] = qid
 
-objectives = []
-for key, (short, full) in OBJECTIVES.items():
-    qs = sorted((q for q in merged if q['obj'] == key), key=lambda q: q['id'])
-    n_sets = max(1, math.ceil(len(qs) / SET_SIZE))
-    sets = [[q['id'] for q in qs[i * len(qs) // n_sets:(i + 1) * len(qs) // n_sets]] for i in range(n_sets)]
-    objectives.append({'id': key, 'domain': int(key[0]), 'short': short, 'full': full, 'sets': sets})
-
-order = {qid: i for i, qid in enumerate(qid for o in objectives for s in o['sets'] for qid in s)}
-merged.sort(key=lambda q: order[q['id']])
+PAGES = [
+    {'src': 'CompTIA', 'file': 'security-plus-topics.html', 'title': 'Security+ by Topic', 'badge': 'S+',
+     'subtitle': 'SY0-701 &middot; Questions grouped by exam objective &middot; Pick a short set to practice',
+     'colors': None},
+    {'src': 'Dion', 'file': 'dion-security-plus-topics.html', 'title': 'Dion Security+ by Topic', 'badge': 'D',
+     'subtitle': 'SY0-701 &middot; Jason Dion practice exam questions grouped by exam objective &middot; Pick a short set to practice',
+     'colors': ('#6b4fbb', '#4d3d8d', '#f4f0ff')},
+]
 
 base = open(os.path.join(root, 'security-plus.html'), encoding='utf-8').read()
 base_css = base[base.index('<style>') + len('<style>'):base.index('</style>')]
 template = open(os.path.join(root, 'scripts', 'topics_template.html'), encoding='utf-8').read()
 
-data = (
-    'const DOMAINS = ' + json.dumps(DOMAINS) + ';\n'
-    'const OBJECTIVES = ' + json.dumps(objectives, indent=1) + ';\n'
-    'const questions = [\n' + ',\n'.join(json.dumps(q, ensure_ascii=False).replace('<', '\\u003c') for q in merged) + '\n];\n'
-)
-out = template.replace('/*__BASE_CSS__*/', base_css).replace('/*__DATA__*/', data)
-open(os.path.join(root, 'security-plus-topics.html'), 'w', encoding='utf-8').write(out)
+for page in PAGES:
+    bank = [q for q in merged if q['src'] == page['src']]
+    objectives = []
+    for key, (short, full) in OBJECTIVES.items():
+        qs = sorted((q for q in bank if q['obj'] == key), key=lambda q: q['id'])
+        if not qs:
+            continue
+        n_sets = math.ceil(len(qs) / SET_SIZE)
+        sets = [[q['id'] for q in qs[i * len(qs) // n_sets:(i + 1) * len(qs) // n_sets]] for i in range(n_sets)]
+        objectives.append({'id': key, 'domain': int(key[0]), 'short': short, 'full': full, 'sets': sets})
 
-print(len(merged), 'questions in', sum(len(o['sets']) for o in objectives), 'sets')
-for o in objectives:
-    print(f"  {o['id']} {o['short']:<34} {sum(map(len, o['sets'])):>3} q, {len(o['sets'])} sets")
+    order = {qid: i for i, qid in enumerate(qid for o in objectives for s in o['sets'] for qid in s)}
+    bank.sort(key=lambda q: order[q['id']])
+
+    data = (
+        'const DOMAINS = ' + json.dumps(DOMAINS) + ';\n'
+        'const OBJECTIVES = ' + json.dumps(objectives, indent=1) + ';\n'
+        'const questions = [\n' + ',\n'.join(json.dumps(q, ensure_ascii=False).replace('<', '\\u003c') for q in bank) + '\n];\n'
+    )
+    out = template.replace('/*__BASE_CSS__*/', base_css)
+    if page['colors']:
+        primary, dark, tint = page['colors']
+        out = out.replace('--primary: #C8102E;', f'--primary: {primary};').replace('--primary-dark: #9c0c22;', f'--primary-dark: {dark};')
+        out = out.replace('#fff5f5', tint)
+    for k in ('title', 'badge', 'subtitle'):
+        out = out.replace(f'__{k.upper()}__', page[k])
+    out = out.replace('/*__DATA__*/', data)
+    open(os.path.join(root, page['file']), 'w', encoding='utf-8').write(out)
+
+    print(page['file'], len(bank), 'questions in', sum(len(o['sets']) for o in objectives), 'sets')
+    for o in objectives:
+        print(f"  {o['id']} {o['short']:<34} {sum(map(len, o['sets'])):>3} q, {len(o['sets'])} sets")
