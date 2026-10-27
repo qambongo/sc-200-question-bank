@@ -4,86 +4,119 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>__TITLE__</title>
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='8' fill='%233f56d8'/%3E%3Cpath d='M16 6l-8 3v6c0 4.5 3.4 8.3 8 9 4.6-.7 8-4.5 8-9V9l-8-3z' fill='none' stroke='white' stroke-width='2.4' stroke-linejoin='round'/%3E%3Cpath d='M12.5 15.5l2.5 2.5 4.5-4.5' fill='none' stroke='white' stroke-width='2.4' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="assets/site.css">
 <style>
-/*__BASE_CSS__*/
+/* Account controls (top bar) */
+.account { display: flex; align-items: center; gap: 10px; }
+.user-chip { display: inline-flex; align-items: center; gap: 8px; font-size: 0.88rem; font-weight: 600; }
+.user-chip .avatar { width: 28px; height: 28px; border-radius: 50%; display: grid; place-items: center; background: var(--accent-soft-2); color: var(--accent); font-weight: 700; font-size: 0.8rem; text-transform: uppercase; }
 
-/* Account bar and sign-in dialog */
-.account { display: flex; align-items: center; gap: 10px; font-size: 0.9rem; color: var(--muted); flex-wrap: wrap; justify-content: flex-end; }
-.account strong { color: var(--text); }
-.account button { min-height: 34px; padding: 6px 14px; font-size: 0.9rem; }
-.sync-note { font-size: 0.8rem; }
+/* Dialog extras */
+.tabs { display: flex; gap: 4px; background: var(--surface-2); border: 1px solid var(--border); border-radius: 10px; padding: 4px; margin-bottom: 16px; }
+.tabs button { flex: 1; min-height: 36px; padding: 6px; background: transparent; color: var(--muted); font-size: 0.9rem; border-radius: 7px; }
+.tabs button.active { background: var(--surface); color: var(--text); box-shadow: var(--shadow-sm); }
+.set-modes { display: flex; flex-direction: column; gap: 8px; margin-top: 16px; }
+.set-modes button { width: 100%; justify-content: space-between; min-height: 48px; }
+.set-modes button span { font-weight: 500; font-size: 0.84rem; opacity: 0.8; }
+
+/* Overview */
+.overview { display: grid; grid-template-columns: 1fr auto; gap: 18px 24px; align-items: center; padding: 20px 24px; margin-bottom: 30px; }
+.overview-stats { display: flex; gap: 10px; flex-wrap: wrap; }
+.overview-stats > div { background: var(--surface-2); border: 1px solid var(--border); border-radius: var(--radius); padding: 10px 16px; min-width: 120px; color: var(--muted); font-size: 0.78rem; font-weight: 600; text-transform: uppercase; letter-spacing: 0.05em; }
+.overview-stats strong { display: block; color: var(--text); font-size: 1.35rem; letter-spacing: -0.01em; text-transform: none; }
+.overview-actions { display: flex; gap: 8px; flex-wrap: wrap; justify-content: flex-end; }
+.sync-note { grid-column: 1 / -1; display: flex; align-items: center; gap: 8px; font-size: 0.85rem; color: var(--muted); border-top: 1px solid var(--border); padding-top: 14px; }
+.sync-note::before { content: ''; width: 8px; height: 8px; border-radius: 50%; background: var(--faint); flex-shrink: 0; }
+.sync-note.ok::before { background: var(--success); }
 .sync-note.error { color: var(--error); }
-.overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.45); display: flex; align-items: center; justify-content: center; padding: 16px; z-index: 50; }
-.dialog { background: var(--card); border-radius: 10px; padding: 26px; width: 100%; max-width: 420px; box-shadow: 0 10px 40px rgba(0,0,0,0.25); max-height: 90vh; overflow-y: auto; }
-.dialog h2 { margin: 0 0 6px; font-size: 1.3rem; }
-.dialog p { color: var(--muted); margin: 0 0 16px; font-size: 0.92rem; }
-.dialog label { display: block; font-weight: 600; font-size: 0.9rem; margin: 12px 0 4px; }
-.dialog input { width: 100%; min-height: 42px; padding: 8px 12px; border: 2px solid var(--border); border-radius: 4px; font: inherit; }
-.dialog input:focus { outline: none; border-color: var(--primary); }
-.dialog .form-error { color: var(--error); font-size: 0.88rem; margin-top: 10px; min-height: 1.2em; }
-.dialog .dialog-actions { display: flex; gap: 10px; margin-top: 18px; flex-wrap: wrap; }
-.dialog .dialog-actions button { flex: 1 1 auto; }
-.tabs { display: flex; gap: 4px; background: #edebe9; border-radius: 6px; padding: 4px; margin-bottom: 14px; }
-.tabs button { flex: 1; min-height: 36px; padding: 6px; background: transparent; font-size: 0.92rem; }
-.tabs button.active { background: var(--card); box-shadow: 0 1px 3px rgba(0,0,0,0.12); }
-.set-modes { display: flex; flex-direction: column; gap: 10px; margin-top: 16px; }
-.set-modes button { width: 100%; text-align: left; display: flex; justify-content: space-between; align-items: center; }
-.set-modes button span { font-weight: 400; font-size: 0.85rem; opacity: 0.85; }
+.sync-note.error::before { background: var(--error); }
+.sync-note button { margin-left: auto; }
 
-/* Topic overview */
-.overview { background: var(--card); border-radius: 10px; padding: 20px 24px; box-shadow: 0 2px 8px rgba(0,0,0,0.08); margin-bottom: 20px; display: flex; gap: 20px; flex-wrap: wrap; align-items: center; justify-content: space-between; }
-.overview-stats { display: flex; gap: 24px; flex-wrap: wrap; }
-.overview-stats div { color: var(--muted); font-size: 0.85rem; }
-.overview-stats strong { display: block; color: var(--text); font-size: 1.35rem; }
-.overview-actions { display: flex; gap: 10px; flex-wrap: wrap; }
-.domain { margin-bottom: 26px; }
-.domain-head { display: flex; justify-content: space-between; align-items: baseline; gap: 12px; flex-wrap: wrap; margin: 0 2px 10px; }
-.domain-head h2 { margin: 0; font-size: 1.15rem; }
+/* Domains and objectives */
+.domain { margin-bottom: 34px; }
+.domain-head { display: flex; align-items: center; gap: 14px; margin-bottom: 14px; }
+.domain-num { flex-shrink: 0; width: 36px; height: 36px; border-radius: 10px; display: grid; place-items: center; background: var(--accent-soft-2); color: var(--accent); font-weight: 800; }
+.domain-head h2 { margin: 0; font-size: 1.12rem; }
 .domain-head .domain-meta { color: var(--muted); font-size: 0.85rem; }
-.objective-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(290px, 1fr)); gap: 14px; }
-.objective { background: var(--card); border: 2px solid var(--border); border-radius: 10px; padding: 16px 18px; display: flex; flex-direction: column; gap: 8px; }
-.objective.complete { border-color: var(--success); }
-.objective h3 { margin: 0; font-size: 1rem; }
-.objective h3 .obj-num { color: var(--primary); margin-right: 6px; }
-.objective .obj-full { color: var(--muted); font-size: 0.82rem; margin: 0; }
-.objective .obj-meta { display: flex; justify-content: space-between; font-size: 0.82rem; color: var(--muted); }
-.mini-bar { height: 6px; background: #e1dfdd; border-radius: 3px; overflow: hidden; display: flex; }
-.mini-bar .ok { background: var(--success); }
-.mini-bar .bad { background: var(--error); }
-.set-chips { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 4px; }
-.set-chip { min-height: 32px; padding: 4px 10px; font-size: 0.8rem; font-weight: 600; border-radius: 16px; background: #f3f2f1; border: 1px solid var(--border); color: var(--text); }
-.set-chip:hover { border-color: var(--primary); background: #fff5f5; }
-.set-chip.started { background: #fff4ce; border-color: #e8c45c; }
-.set-chip.done { background: #dff6dd; border-color: #8fcf8a; }
-.set-chip.done.weak { background: #fde7e9; border-color: #e6a1a8; }
-.src-tag { background: var(--ink) !important; color: #fff; }
+.domain-progress { margin-left: auto; width: 160px; text-align: right; font-size: 0.8rem; color: var(--muted); }
+.domain-progress .mini-bar { margin-top: 5px; }
+.objective-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(300px, 1fr)); gap: 14px; }
+.objective { background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius-lg); padding: 18px; display: flex; flex-direction: column; gap: 10px; box-shadow: var(--shadow-sm); transition: box-shadow 0.15s, border-color 0.15s; }
+.objective:hover { box-shadow: var(--shadow); }
+.objective.complete { border-color: var(--success-border); }
+.obj-top { display: flex; gap: 10px; align-items: flex-start; }
+.obj-num { flex-shrink: 0; font-size: 0.75rem; font-weight: 800; color: var(--accent); background: var(--accent-soft); border: 1px solid var(--accent-soft-2); border-radius: 7px; padding: 2px 7px; margin-top: 1px; }
+.objective h3 { margin: 0; font-size: 0.98rem; }
+.objective .obj-full { color: var(--muted); font-size: 0.82rem; margin: 2px 0 0; line-height: 1.4; }
+.objective .obj-meta { display: flex; justify-content: space-between; font-size: 0.8rem; color: var(--muted); }
+.set-chips { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 2px; }
+.set-chip { min-height: 30px; padding: 3px 10px; font-size: 0.78rem; font-weight: 600; border-radius: 999px; background: var(--surface-2); border: 1px solid var(--border); color: var(--text); gap: 5px; }
+.set-chip:hover { border-color: var(--accent); background: var(--accent-soft); }
+.set-chip.started { background: var(--warn-bg); border-color: var(--warn-border); color: var(--warn); }
+.set-chip.done { background: var(--success-bg); border-color: var(--success-border); color: var(--success); }
+.set-chip.done.weak { background: var(--error-bg); border-color: var(--error-border); color: var(--error); }
+.set-chip.done::before { content: '\2713'; font-weight: 800; }
+.legend { display: flex; gap: 14px; flex-wrap: wrap; font-size: 0.8rem; color: var(--muted); margin: -12px 0 24px; }
+.legend span { display: inline-flex; align-items: center; gap: 6px; }
+.legend i { width: 10px; height: 10px; border-radius: 3px; display: inline-block; border: 1px solid var(--border-strong); background: var(--surface-2); }
+.legend i.started { background: var(--warn-bg); border-color: var(--warn-border); }
+.legend i.done { background: var(--success-bg); border-color: var(--success-border); }
+.legend i.weak { background: var(--error-bg); border-color: var(--error-border); }
+
+@media (max-width: 640px) {
+  .overview { grid-template-columns: 1fr; padding: 16px; }
+  .overview-stats > div { flex: 1 1 0; min-width: 0; padding: 10px 12px; }
+  .overview-actions { justify-content: stretch; }
+  .overview-actions button { flex: 1; }
+  .domain-progress { display: none; }
+  .user-chip .name { display: none; }
+}
 </style>
 </head>
-<body>
-<div class="container">
-  <div class="top-bar">
-    <a href="index.html">&larr; All exams</a>
-    <div class="account" id="account"></div>
+<body class="__THEME__">
+<header class="site-nav">
+  <div class="site-nav-inner">
+    <a class="site-brand" href="index.html"><span class="site-logo"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3 4 6v6c0 4.5 3.4 8.3 8 9 4.6-.7 8-4.5 8-9V6l-8-3Z"/><path d="m9 12 2 2 4-4"/></svg></span>Practice Hub</a>
+    <nav class="site-links"><a href="index.html#security-plus" class="active">Security+</a><a href="index.html#sc-200">SC-200</a></nav>
+    <div class="site-nav-end account" id="account"></div>
   </div>
-  <div class="brand-header">
-    <div class="brand-badge">__BADGE__</div>
-    <div>
-      <h1>__TITLE__</h1>
-      <p>__SUBTITLE__</p>
+</header>
+
+<main class="container">
+  <div class="page-hero">
+    <div class="crumbs"><a href="index.html">Home</a><span>/</span><a href="index.html#security-plus">Security+</a><span>/</span><span>__CRUMB__</span></div>
+    <div class="hero-row">
+      <div class="exam-badge">__BADGE__</div>
+      <div>
+        <h1>__TITLE__</h1>
+        <p>__SUBTITLE__</p>
+      </div>
     </div>
   </div>
 
   <!-- TOPICS SCREEN -->
   <div id="select-screen">
-    <div class="overview">
+    <div class="card overview">
       <div class="overview-stats">
         <div><strong id="ov-answered">0</strong>Answered</div>
         <div><strong id="ov-accuracy">&ndash;</strong>Accuracy</div>
-        <div><strong id="ov-done">0</strong>Sets complete</div>
+        <div><strong id="ov-done">0</strong>Sets done</div>
       </div>
       <div class="overview-actions">
-        <button class="btn-secondary" id="review-wrong-btn" type="button">Redo all incorrect</button>
+        <button class="btn-secondary" id="reset-btn" type="button">Reset</button>
+        <button class="btn-primary" id="review-wrong-btn" type="button">Redo all incorrect</button>
       </div>
+      <div class="sync-note" id="sync-note"></div>
+    </div>
+    <div class="legend">
+      <span><i></i>Not started</span>
+      <span><i class="started"></i>In progress</span>
+      <span><i class="done"></i>Done, 70%+</span>
+      <span><i class="weak"></i>Done, under 70%</span>
     </div>
     <div id="domain-list"></div>
   </div>
@@ -101,7 +134,6 @@
 
     <div class="quiz-card" id="quiz-container">
       <div class="tag-row">
-        <span class="tag src-tag" id="source-tag"></span>
         <span class="tag" id="topic-tag"></span>
         <span class="tag" id="difficulty-tag"></span>
       </div>
@@ -116,9 +148,10 @@
         <div class="explanations collapsed" id="explanations-container"></div>
       </div>
       <div class="controls">
-        <button class="btn-secondary" id="quit-btn" type="button">Save &amp; exit</button>
+        <button class="btn-ghost" id="quit-btn" type="button">Save &amp; exit</button>
+        <span class="spacer"></span>
+        <button class="btn-secondary" id="skip-btn" type="button">Skip</button>
         <button class="btn-primary" id="check-btn" disabled>Check Answer</button>
-        <button class="btn-secondary" id="skip-btn" type="button">Skip Question</button>
         <button class="btn-primary hidden" id="next-btn">Next Question</button>
       </div>
     </div>
@@ -130,7 +163,7 @@
     <h2 id="results-module-name">Set Results</h2>
     <div class="score-circle">
       <span id="final-percent">0%</span>
-      <small style="font-size: 1rem; font-weight: normal; opacity: 0.9;">Score</small>
+      <small style="font-size: 0.9rem; font-weight: 500; opacity: 0.9;">Score</small>
     </div>
     <div class="stats-grid">
       <div class="stat-box"><div class="label">Questions</div><div class="value" id="stat-total">0</div></div>
@@ -152,13 +185,13 @@
 
   <!-- REVIEW SCREEN -->
   <div class="hidden" id="review-screen">
-    <div class="quiz-card" style="text-align:center;">
-      <h2 style="margin-top:0;">Review Answers</h2>
+    <div class="card review-header">
+      <h2>Review Answers</h2>
       <button class="btn-secondary" id="back-to-results-btn" type="button">&larr; Back to Results</button>
     </div>
     <div id="review-list"></div>
   </div>
-</div>
+</main>
 
 <!-- SIGN-IN DIALOG -->
 <div class="overlay hidden" id="auth-overlay">
@@ -305,39 +338,45 @@ async function initAccount() {
 function renderAccount() {
   const el = document.getElementById('account');
   el.innerHTML = '';
-  const note = document.createElement('span');
+  const note = document.getElementById('sync-note');
   note.className = 'sync-note';
+  note.textContent = '';
   if (user) {
-    const who = document.createElement('span');
-    who.append('Signed in as ');
-    const name = document.createElement('strong');
+    const chip = document.createElement('span');
+    chip.className = 'user-chip';
+    const avatar = document.createElement('span');
+    avatar.className = 'avatar';
+    avatar.textContent = user.username.charAt(0);
+    const name = document.createElement('span');
+    name.className = 'name';
     name.textContent = user.username;
-    who.append(name);
-    el.append(who);
-    if (syncState === 'error') { note.textContent = 'Not synced, will retry'; note.classList.add('error'); }
-    else note.textContent = Object.keys(pending).length ? 'Saving…' : 'Progress saved';
-    el.append(note);
-    const resetBtn = document.createElement('button');
-    resetBtn.className = 'btn-secondary';
-    resetBtn.textContent = 'Reset progress';
-    resetBtn.onclick = resetProgress;
+    chip.append(avatar, name);
     const out = document.createElement('button');
-    out.className = 'btn-secondary';
+    out.className = 'btn-secondary btn-sm';
     out.textContent = 'Sign out';
     out.onclick = signOut;
-    el.append(resetBtn, out);
-  } else {
-    note.textContent = syncState === 'offline'
-      ? 'Sign-in unavailable here, progress saved on this device only'
-      : 'Progress saved on this device only';
-    el.append(note);
-    if (syncState !== 'offline') {
-      const btn = document.createElement('button');
-      btn.className = 'btn-primary';
-      btn.textContent = 'Sign in';
-      btn.onclick = () => openAuth('login');
-      el.append(btn);
+    el.append(chip, out);
+    if (syncState === 'error') {
+      note.textContent = 'Could not reach the server. Your answers are kept here and will sync on the next try.';
+      note.classList.add('error');
+    } else {
+      note.textContent = Object.keys(pending).length ? 'Saving…' : `Progress synced to ${user.username}'s account`;
+      note.classList.add('ok');
     }
+  } else if (syncState === 'offline') {
+    note.textContent = 'Accounts are unavailable here, so progress is saved on this device only.';
+  } else {
+    const btn = document.createElement('button');
+    btn.className = 'btn-primary btn-sm';
+    btn.textContent = 'Sign in';
+    btn.onclick = () => openAuth('login');
+    el.append(btn);
+    note.textContent = 'Progress is saved on this device only. Sign in to keep it across devices.';
+    const create = document.createElement('button');
+    create.className = 'btn-secondary btn-sm';
+    create.textContent = 'Create account';
+    create.onclick = () => openAuth('register');
+    note.append(create);
   }
 }
 
@@ -399,7 +438,7 @@ async function resetProgress() {
   if (!confirm('Erase your saved answers for this question bank? This cannot be undone.')) return;
   const ids = questions.map(q => q.id);
   try {
-    await api('/api/progress', { method: 'POST', body: JSON.stringify({ clear: ids }) });
+    if (user) await api('/api/progress', { method: 'POST', body: JSON.stringify({ clear: ids }) });
     ids.forEach(id => { delete progress[id]; delete pending[id]; });
     saveLocal();
   } catch (e) {
@@ -435,6 +474,7 @@ function renderTopics() {
   const wrongBtn = document.getElementById('review-wrong-btn');
   wrongBtn.textContent = `Redo all incorrect (${wrongCount})`;
   wrongBtn.disabled = wrongCount === 0;
+  document.getElementById('reset-btn').classList.toggle('hidden', all.answered === 0);
 
   const list = document.getElementById('domain-list');
   list.innerHTML = '';
@@ -446,8 +486,12 @@ function renderTopics() {
     section.className = 'domain';
     section.innerHTML = `
       <div class="domain-head">
-        <h2>${d.n}.0 ${d.name}</h2>
-        <span class="domain-meta">${d.weight}% of exam &middot; ${ds.answered}/${ds.total} answered</span>
+        <span class="domain-num">${d.n}</span>
+        <div>
+          <h2>${d.name}</h2>
+          <span class="domain-meta">Domain ${d.n}.0 &middot; ${d.weight}% of exam &middot; ${objs.length} objectives</span>
+        </div>
+        <div class="domain-progress">${ds.answered}/${ds.total} answered${miniBar(ds)}</div>
       </div>
       <div class="objective-grid"></div>`;
     const grid = section.querySelector('.objective-grid');
@@ -457,10 +501,12 @@ function renderTopics() {
       card.className = 'objective' + (os.answered === os.total ? ' complete' : '');
       const acc = os.answered ? ` &middot; ${Math.round((os.correct / os.answered) * 100)}% correct` : '';
       card.innerHTML = `
-        <h3><span class="obj-num">${o.id}</span>${o.short}</h3>
-        <p class="obj-full">${o.full}</p>
+        <div class="obj-top">
+          <span class="obj-num">${o.id}</span>
+          <div><h3>${o.short}</h3><p class="obj-full">${o.full}</p></div>
+        </div>
         ${miniBar(os)}
-        <div class="obj-meta"><span>${os.answered}/${os.total} answered${acc}</span><span>${o.sets.length} sets</span></div>
+        <div class="obj-meta"><span>${os.answered}/${os.total} answered${acc}</span><span>${o.sets.length} set${o.sets.length === 1 ? '' : 's'}</span></div>
         <div class="set-chips"></div>`;
       const chips = card.querySelector('.set-chips');
       o.sets.forEach((ids, i) => {
@@ -478,7 +524,7 @@ function renderTopics() {
           chip.classList.add('started');
           chip.textContent = `Set ${i + 1} · ${s.answered}/${s.total}`;
         } else {
-          chip.textContent = `Set ${i + 1} · ${s.total}q`;
+          chip.textContent = `Set ${i + 1} · ${s.total} q`;
         }
         chip.onclick = () => openSet(o, i);
         chips.appendChild(chip);
@@ -621,7 +667,6 @@ function loadQuestion() {
 
   updateHeaderStatus();
 
-  document.getElementById('source-tag').textContent = q.src;
   document.getElementById('topic-tag').textContent = `${q.obj} ${q.top}${q.sub ? ' • ' + q.sub : ''}`;
   const diffTag = document.getElementById('difficulty-tag');
   diffTag.textContent = q.d.charAt(0).toUpperCase() + q.d.slice(1);
@@ -660,7 +705,7 @@ function loadQuestion() {
     q.o.forEach((opt, index) => {
       const div = document.createElement('div');
       div.className = 'option';
-      div.innerHTML = `<span class="option-letter">${String.fromCharCode(65 + index)}.</span> <span>${opt.substring(3)}</span>`;
+      div.innerHTML = `<span class="option-letter">${String.fromCharCode(65 + index)}</span> <span>${opt.substring(3)}</span>`;
       if (!answered && currentSelections.includes(index)) div.classList.add('selected');
       div.onclick = () => toggleOption(index, isMulti);
       optionsContainer.appendChild(div);
@@ -956,7 +1001,7 @@ function showReview() {
         if (isCorrectOpt && wasSelected) cls += ' correct';
         else if (isCorrectOpt && !wasSelected) cls += ' missed';
         else if (!isCorrectOpt && wasSelected) cls += ' incorrect';
-        return `<div class="${cls}"><span class="option-letter">${String.fromCharCode(65 + i)}.</span> <span>${opt.substring(3)}</span></div>`;
+        return `<div class="${cls}"><span class="option-letter">${String.fromCharCode(65 + i)}</span> <span>${opt.substring(3)}</span></div>`;
       }).join('');
     }
 
@@ -964,7 +1009,7 @@ function showReview() {
     item.className = 'review-item';
     item.innerHTML = `
       <div class="review-q-header">
-        <span class="tag">${q.src} · ${q.obj} ${q.top}${q.sub ? ' • ' + q.sub : ''}</span>
+        <span class="tag">${q.obj} ${q.top}${q.sub ? ' • ' + q.sub : ''}</span>
         <span class="review-result ${resultClass}">${resultLabel}</span>
       </div>
       <div class="question-text" style="font-size:1.05rem;"></div>
@@ -996,6 +1041,7 @@ document.getElementById('explanation-toggle').addEventListener('click', () => {
   toggle.setAttribute('aria-expanded', String(!isCollapsed));
   toggle.textContent = isCollapsed ? 'Show explanations' : 'Hide explanations';
 });
+document.getElementById('reset-btn').addEventListener('click', resetProgress);
 document.getElementById('review-wrong-btn').addEventListener('click', () => {
   const wrong = questions.filter(q => progress[q.id] && progress[q.id][0] === '0').map(q => q.id);
   if (wrong.length) startSession(wrong, 'All incorrect answers', null);

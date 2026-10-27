@@ -4,95 +4,239 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Certification Practice Hub</title>
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='8' fill='%233f56d8'/%3E%3Cpath d='M16 6l-8 3v6c0 4.5 3.4 8.3 8 9 4.6-.7 8-4.5 8-9V9l-8-3z' fill='none' stroke='white' stroke-width='2.4' stroke-linejoin='round'/%3E%3Cpath d='M12.5 15.5l2.5 2.5 4.5-4.5' fill='none' stroke='white' stroke-width='2.4' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="assets/site.css">
 <style>
-:root { --bg: #f3f2f1; --card: #ffffff; --text: #201f1e; --muted: #605e5c; }
-* { box-sizing: border-box; }
-body { font-family: 'Segoe UI', sans-serif; background: var(--bg); color: var(--text); margin: 0; padding: 24px; }
-.container { max-width: 960px; margin: 0 auto; }
-header { text-align: center; margin-bottom: 32px; }
-header h1 { margin: 0 0 8px; font-size: 2rem; }
-header p { color: var(--muted); margin: 0; }
-.exam-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 24px; }
-.exam-card { background: var(--card); border-radius: 12px; padding: 28px; box-shadow: 0 2px 10px rgba(0,0,0,0.08); border-top: 6px solid var(--accent); display: flex; flex-direction: column; gap: 12px; text-decoration: none; color: inherit; transition: transform 0.15s, box-shadow 0.15s; }
-.exam-card:hover { transform: translateY(-3px); box-shadow: 0 6px 18px rgba(0,0,0,0.12); }
-.exam-badge { display: inline-flex; align-items: center; justify-content: center; width: 56px; height: 56px; border-radius: 10px; background: var(--accent); color: #fff; font-weight: 800; font-size: 1.1rem; letter-spacing: 0.5px; }
-.exam-card h2 { margin: 0; font-size: 1.35rem; }
-.exam-card .subtitle { color: var(--muted); font-size: 0.95rem; margin: 0; }
-.exam-card .meta { display: flex; gap: 14px; flex-wrap: wrap; font-size: 0.85rem; color: var(--muted); margin-top: auto; }
-.exam-card .meta span { background: #f5f5f5; padding: 4px 10px; border-radius: 12px; }
-.exam-card .cta { margin-top: 8px; font-weight: 700; color: var(--accent); }
-.sc200 { --accent: #0078d4; }
-.secplus { --accent: #C8102E; }
-footer { text-align: center; margin-top: 40px; color: var(--muted); font-size: 0.85rem; }
-@media (max-width: 600px) {
-  body { padding: 16px; }
-  header h1 { font-size: 1.6rem; }
+.hub-hero { padding: 48px 0 36px; text-align: center; }
+.hub-hero h1 { margin: 0 0 10px; font-size: clamp(1.8rem, 4.5vw, 2.6rem); font-weight: 800; letter-spacing: -0.03em; }
+.hub-hero p { margin: 0 auto; max-width: 560px; color: var(--muted); font-size: 1.05rem; }
+.hero-stats { display: inline-flex; gap: 6px; margin-top: 22px; flex-wrap: wrap; justify-content: center; }
+.hero-stats span { background: var(--surface); border: 1px solid var(--border); border-radius: 999px; padding: 5px 14px; font-size: 0.85rem; color: var(--muted); box-shadow: var(--shadow-sm); }
+.hero-stats strong { color: var(--text); }
+
+.exam-section { margin-bottom: 44px; scroll-margin-top: 80px; }
+.exam-head { display: flex; align-items: center; gap: 14px; margin-bottom: 16px; }
+.exam-head h2 { margin: 0; font-size: 1.35rem; font-weight: 750; }
+.exam-head p { margin: 2px 0 0; color: var(--muted); font-size: 0.92rem; }
+.bank-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(320px, 1fr)); gap: 16px; }
+.bank-card { background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius-lg); box-shadow: var(--shadow); padding: 22px; display: flex; flex-direction: column; gap: 14px; position: relative; overflow: hidden; }
+.bank-card::before { content: ''; position: absolute; inset: 0 0 auto 0; height: 4px; background: linear-gradient(90deg, var(--accent-base), color-mix(in srgb, var(--accent-base) 55%, white)); }
+.bank-head { display: flex; justify-content: space-between; align-items: flex-start; gap: 12px; }
+.bank-head h3 { margin: 0; font-size: 1.08rem; }
+.bank-head .source { color: var(--muted); font-size: 0.85rem; margin-top: 2px; }
+.count-pill { flex-shrink: 0; background: var(--accent-soft-2); color: var(--accent); font-weight: 700; font-size: 0.8rem; padding: 4px 10px; border-radius: 999px; white-space: nowrap; }
+.modes { display: flex; flex-direction: column; gap: 8px; }
+.mode { display: flex; align-items: center; gap: 14px; padding: 13px 14px; border: 1px solid var(--border); border-radius: var(--radius); text-decoration: none; color: var(--text); background: var(--surface); transition: border-color 0.15s, background 0.15s, transform 0.15s; }
+.mode:hover { border-color: var(--accent); background: var(--accent-soft); }
+.mode:hover .chev { transform: translateX(3px); color: var(--accent); }
+.mode-icon { flex-shrink: 0; width: 38px; height: 38px; border-radius: 10px; display: grid; place-items: center; background: var(--accent-soft-2); color: var(--accent); }
+.mode-icon svg { width: 19px; height: 19px; }
+.mode-body { flex: 1; min-width: 0; }
+.mode-body strong { display: block; font-size: 0.95rem; }
+.mode-body span { display: block; color: var(--muted); font-size: 0.83rem; }
+.mode-progress { margin-top: 8px; }
+.mode-progress .mini-bar { margin-bottom: 4px; }
+.mode-progress small { color: var(--muted); font-size: 0.78rem; }
+.chev { flex-shrink: 0; width: 18px; height: 18px; color: var(--faint); transition: transform 0.15s, color 0.15s; }
+.mode-body .badge-new { display: inline-block; margin-left: 6px; padding: 1px 7px; border-radius: 999px; font-size: 0.68rem; font-weight: 700; background: var(--success-bg); color: var(--success); vertical-align: 1px; }
+.user-chip { display: inline-flex; align-items: center; gap: 8px; font-size: 0.85rem; color: var(--muted); }
+.user-chip .avatar { width: 28px; height: 28px; border-radius: 50%; display: grid; place-items: center; background: var(--surface-3); color: var(--text); font-weight: 700; font-size: 0.8rem; text-transform: uppercase; }
+@media (max-width: 640px) {
+  .hub-hero { padding: 32px 0 24px; }
+  .bank-grid { grid-template-columns: 1fr; }
+  .bank-card { padding: 18px; }
+  .user-chip .name { display: none; }
 }
 </style>
 </head>
 <body>
-<div class="container">
-  <header>
-    <h1>Certification Practice Hub</h1>
-    <p>Select an exam to begin practicing.</p>
-  </header>
-  <div class="exam-grid">
-    <a class="exam-card sc200" href="sc-200.html">
-      <div class="exam-badge">SC</div>
-      <h2>Microsoft SC-200</h2>
-      <p class="subtitle">Security Operations Analyst</p>
-      <div class="meta">
-        <span>906 standard questions</span>
-        <span>285 advanced questions</span>
-      </div>
-      <div class="cta">Start practicing &rarr;</div>
-    </a>
-    <a class="exam-card secplus" href="security-plus.html">
-      <div class="exam-badge">S+</div>
-      <h2>CompTIA Security+</h2>
-      <p class="subtitle">SY0-701</p>
-      <div class="meta">
-        <span>5 domains</span>
-        <span>Timed modules</span>
-        <span>Scenario-based</span>
-      </div>
-      <div class="cta">Start practicing &rarr;</div>
-    </a>
-    <a class="exam-card" href="dion-security-plus.html" style="--accent: #6b4fbb;">
-      <div class="exam-badge">D</div>
-      <h2>Dion Security+</h2>
-      <p class="subtitle">SY0-701 &middot; Udemy course bank</p>
-      <div class="meta">
-        <span>6 practice exams</span>
-        <span>540 questions</span>
-        <span>Timed modules</span>
-      </div>
-      <div class="cta">Start practicing &rarr;</div>
-    </a>
-    <a class="exam-card secplus" href="security-plus-topics.html">
-      <div class="exam-badge">S+</div>
-      <h2>Security+ by Topic</h2>
-      <p class="subtitle">SY0-701 &middot; Grouped by exam objective</p>
-      <div class="meta">
-        <span>28 objectives</span>
-        <span>864 questions</span>
-        <span>Saved progress</span>
-      </div>
-      <div class="cta">Start practicing &rarr;</div>
-    </a>
-    <a class="exam-card" href="dion-security-plus-topics.html" style="--accent: #6b4fbb;">
-      <div class="exam-badge">D</div>
-      <h2>Dion Security+ by Topic</h2>
-      <p class="subtitle">SY0-701 &middot; Udemy bank grouped by exam objective</p>
-      <div class="meta">
-        <span>28 objectives</span>
-        <span>540 questions</span>
-        <span>Saved progress</span>
-      </div>
-      <div class="cta">Start practicing &rarr;</div>
-    </a>
+<header class="site-nav">
+  <div class="site-nav-inner">
+    <a class="site-brand" href="index.html"><span class="site-logo"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3 4 6v6c0 4.5 3.4 8.3 8 9 4.6-.7 8-4.5 8-9V6l-8-3Z"/><path d="m9 12 2 2 4-4"/></svg></span>Practice Hub</a>
+    <nav class="site-links"><a href="#security-plus">Security+</a><a href="#sc-200">SC-200</a></nav>
+    <div class="site-nav-end" id="nav-user"></div>
   </div>
-  <footer>Choose a module inside each exam to start a timed practice session.</footer>
-</div>
+</header>
+
+<main class="container">
+  <section class="hub-hero">
+    <h1>Certification Practice Hub</h1>
+    <p>Practice questions for CompTIA Security+ and Microsoft SC-200. Pick an exam, then choose how you want to study.</p>
+    <div class="hero-stats">
+      <span><strong>2</strong> exams</span>
+      <span><strong>4</strong> question banks</span>
+      <span><strong>2,595</strong> questions</span>
+    </div>
+  </section>
+
+  <section class="exam-section theme-comptia" id="security-plus">
+    <div class="exam-head">
+      <div class="exam-badge">S+</div>
+      <div>
+        <h2>CompTIA Security+</h2>
+        <p>SY0-701 &middot; 5 domains &middot; 28 objectives &middot; 1,404 questions</p>
+      </div>
+    </div>
+    <div class="bank-grid">
+      <article class="bank-card theme-comptia">
+        <div class="bank-head">
+          <div><h3>CompTIA question bank</h3><div class="source">Scenario-based questions and PBQs</div></div>
+          <span class="count-pill">864 questions</span>
+        </div>
+        <div class="modes">
+          <a class="mode" href="security-plus-topics.html">
+            <span class="mode-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m12 2 9 5-9 5-9-5 9-5Z"/><path d="m3 12 9 5 9-5"/><path d="m3 17 9 5 9-5"/></svg></span>
+            <span class="mode-body">
+              <strong>Study by topic <span class="badge-new">Saves progress</span></strong>
+              <span>28 objectives in short sets of about 13 questions</span>
+              <span class="mode-progress hidden" data-bank="CompTIA"></span>
+            </span>
+            <svg class="chev" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="m9 18 6-6-6-6"/></svg>
+          </a>
+          <a class="mode" href="security-plus.html">
+            <span class="mode-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="13" r="8"/><path d="M12 9v4l2 2"/><path d="M10 2h4"/></svg></span>
+            <span class="mode-body">
+              <strong>Timed domain exams</strong>
+              <span>One exam per domain, 1 minute per question</span>
+            </span>
+            <svg class="chev" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="m9 18 6-6-6-6"/></svg>
+          </a>
+        </div>
+      </article>
+
+      <article class="bank-card theme-dion">
+        <div class="bank-head">
+          <div><h3>Jason Dion question bank</h3><div class="source">From the six Udemy practice exams</div></div>
+          <span class="count-pill">540 questions</span>
+        </div>
+        <div class="modes">
+          <a class="mode" href="dion-security-plus-topics.html">
+            <span class="mode-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m12 2 9 5-9 5-9-5 9-5Z"/><path d="m3 12 9 5 9-5"/><path d="m3 17 9 5 9-5"/></svg></span>
+            <span class="mode-body">
+              <strong>Study by topic <span class="badge-new">Saves progress</span></strong>
+              <span>28 objectives in short sets of about 11 questions</span>
+              <span class="mode-progress hidden" data-bank="Dion"></span>
+            </span>
+            <svg class="chev" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="m9 18 6-6-6-6"/></svg>
+          </a>
+          <a class="mode" href="dion-security-plus.html">
+            <span class="mode-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="13" r="8"/><path d="M12 9v4l2 2"/><path d="M10 2h4"/></svg></span>
+            <span class="mode-body">
+              <strong>Timed practice exams</strong>
+              <span>6 full exams of 90 questions, 1 minute per question</span>
+            </span>
+            <svg class="chev" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="m9 18 6-6-6-6"/></svg>
+          </a>
+        </div>
+      </article>
+    </div>
+  </section>
+
+  <section class="exam-section theme-sc200" id="sc-200">
+    <div class="exam-head">
+      <div class="exam-badge">SC</div>
+      <div>
+        <h2>Microsoft SC-200</h2>
+        <p>Security Operations Analyst &middot; 1,191 questions</p>
+      </div>
+    </div>
+    <div class="bank-grid">
+      <article class="bank-card">
+        <div class="bank-head">
+          <div><h3>Standard question bank</h3><div class="source">Every SC-200 learning module</div></div>
+          <span class="count-pill">906 questions</span>
+        </div>
+        <div class="modes">
+          <a class="mode" href="sc-200.html">
+            <span class="mode-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 19.5v-15A2.5 2.5 0 0 1 6.5 2H20v20H6.5a2.5 2.5 0 0 1 0-5H20"/></svg></span>
+            <span class="mode-body">
+              <strong>Practice by module</strong>
+              <span>Filter by module and save your place on this device</span>
+            </span>
+            <svg class="chev" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="m9 18 6-6-6-6"/></svg>
+          </a>
+        </div>
+      </article>
+      <article class="bank-card">
+        <div class="bank-head">
+          <div><h3>Advanced question bank</h3><div class="source">Scenario and reasoning questions</div></div>
+          <span class="count-pill">285 questions</span>
+        </div>
+        <div class="modes">
+          <a class="mode" href="sc-200-advanced.html">
+            <span class="mode-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="7"/><path d="m20 20-3.5-3.5"/></svg></span>
+            <span class="mode-body">
+              <strong>Investigations, KQL and best next action</strong>
+              <span>Filter by module, reasoning type and difficulty</span>
+            </span>
+            <svg class="chev" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="m9 18 6-6-6-6"/></svg>
+          </a>
+        </div>
+      </article>
+    </div>
+  </section>
+
+  <footer class="site-footer">Sign in on a "Study by topic" page to keep your progress across devices.</footer>
+</main>
+
+<script>
+/* Shows each topic bank's saved progress on its card. Progress maps question id -> "1:<ts>" / "0:<ts>". */
+function loadLocal(key) {
+  try { return JSON.parse(localStorage.getItem(key) || '{}') || {}; } catch (e) { return {}; }
+}
+
+function renderUser(username) {
+  const el = document.getElementById('nav-user');
+  const chip = document.createElement('span');
+  chip.className = 'user-chip';
+  const avatar = document.createElement('span');
+  avatar.className = 'avatar';
+  avatar.textContent = username.charAt(0);
+  const name = document.createElement('span');
+  name.className = 'name';
+  name.textContent = username;
+  chip.append(avatar, name);
+  el.append(chip);
+}
+
+function renderProgress(progress, banks) {
+  document.querySelectorAll('.mode-progress').forEach(el => {
+    const ids = banks[el.dataset.bank] || [];
+    let correct = 0, answered = 0;
+    ids.forEach(id => {
+      const v = progress[id];
+      if (!v) return;
+      answered++;
+      if (v[0] === '1') correct++;
+    });
+    if (!answered) return;
+    const ok = (correct / ids.length) * 100;
+    const bad = ((answered - correct) / ids.length) * 100;
+    el.innerHTML = `<span class="mini-bar"><span class="ok" style="width:${ok}%"></span><span class="bad" style="width:${bad}%"></span></span>` +
+      `<small>${answered} of ${ids.length} answered &middot; ${Math.round((correct / answered) * 100)}% correct</small>`;
+    el.classList.remove('hidden');
+  });
+}
+
+(async () => {
+  let banks;
+  try { banks = await (await fetch('assets/banks.json')).json(); } catch (e) { return; }
+  let progress = loadLocal('sp-topics-progress:guest');
+  try {
+    const me = await (await fetch('/api/auth', { credentials: 'same-origin' })).json();
+    if (me.username) {
+      renderUser(me.username);
+      progress = loadLocal('sp-topics-progress:' + me.username);
+      renderProgress(progress, banks);
+      const res = await fetch('/api/progress', { credentials: 'same-origin' });
+      if (res.ok) progress = (await res.json()).progress || progress;
+    }
+  } catch (e) {}
+  renderProgress(progress, banks);
+})();
+</script>
 </body>
 </html>

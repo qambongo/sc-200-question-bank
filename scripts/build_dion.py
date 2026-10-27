@@ -56,13 +56,20 @@ for path in sorted(glob.glob(os.path.join(src_dir, '*.html'))):
         questions.append(q)
 
 out = template
-out = out.replace('<title>CompTIA Security+ Practice Exam</title>', '<title>Dion Security+ Practice Bank</title>')
-out = out.replace('--primary: #C8102E;', '--primary: #6b4fbb;').replace('--primary-dark: #9c0c22;', '--primary-dark: #4d3d8d;')
-out = out.replace('#fff5f5', '#f4f0ff')
-out = out.replace('<div class="brand-badge">S+</div>', '<div class="brand-badge">D</div>')
-out = out.replace('<h1>CompTIA Security+ Practice Exam</h1>', '<h1>Dion Security+ Practice Bank</h1>')
-out = out.replace('<p>SY0-701 &middot; Select a module to begin a timed practice session</p>',
-                  '<p>SY0-701 &middot; Jason Dion Udemy practice exams &middot; Select an exam to begin a timed practice session</p>')
+
+def swap(old, new):
+    global out
+    assert old in out, old
+    out = out.replace(old, new)
+
+swap('<title>CompTIA Security+ Practice Exam</title>', '<title>Dion Security+ Practice Bank</title>')
+swap('<body class="theme-comptia">', '<body class="theme-dion">')
+swap('<div class="exam-badge">S+</div>', '<div class="exam-badge">D</div>')
+swap('<span>CompTIA bank &middot; Timed exams</span>', '<span>Dion bank &middot; Timed practice exams</span>')
+swap('<h1>CompTIA Security+ Practice Exam</h1>', '<h1>Dion Security+ Practice Bank</h1>')
+swap('<p>SY0-701 &middot; Select a module to begin a timed practice session</p>',
+     '<p>SY0-701 &middot; Jason Dion Udemy practice exams &middot; Select an exam to begin a timed practice session</p>')
+swap('<h2>Choose a module</h2>', '<h2>Choose a practice exam</h2>')
 
 start = out.index('const MODULE_ORDER = [')
 end = out.index('const TIME_PER_QUESTION_SECONDS')

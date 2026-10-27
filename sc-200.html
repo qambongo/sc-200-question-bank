@@ -4,123 +4,57 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>SC-200 Interactive Practice Quiz</title>
-<style>
-:root { --primary: #0078d4; --success: #107c10; --error: #d13438; --bg: #f3f2f1; --card: #ffffff; --text: #323130; }
-* { box-sizing: border-box; }
-body { font-family: 'Segoe UI', sans-serif; background: var(--bg); color: var(--text); margin: 0; padding: 20px; }
-.container { max-width: 1000px; margin: 0 auto; }
-.header { background: var(--card); padding: 20px; border-radius: 8px; box-shadow: 0 2px 4px rgba(0,0,0,0.1); margin-bottom: 20px; display: flex; justify-content: space-between; flex-wrap: wrap; gap: 15px; }
-.module-selector { display: flex; flex-direction: column; gap: 6px; min-width: min(100%, 360px); }
-.module-selector label { font-size: 0.85rem; font-weight: 600; color: #605e5c; }
-.module-selector select { padding: 10px 12px; border: 2px solid #e1dfdd; border-radius: 4px; background: var(--card); color: var(--text); font: inherit; }
-.module-selector select:focus { outline: 2px solid var(--primary); outline-offset: 1px; }
-.bank-selector { display: flex; flex-direction: column; gap: 6px; min-width: min(100%, 220px); }
-.bank-selector label { font-size: 0.85rem; font-weight: 600; color: #605e5c; }
-.bank-selector select { padding: 10px 12px; border: 2px solid #e1dfdd; border-radius: 4px; background: var(--card); color: var(--text); font: inherit; }
-.bank-selector select:focus { outline: 2px solid var(--primary); outline-offset: 1px; }
-.stats { display: flex; gap: 20px; font-weight: 600; }
-.stat-item span { color: var(--primary); font-size: 1.2rem; }
-.progress-bar { width: 100%; height: 6px; background: #e1dfdd; border-radius: 3px; margin-top: 10px; overflow: hidden; }
-.progress-fill { height: 100%; background: var(--primary); transition: width 0.3s; }
-.quiz-card { background: var(--card); padding: 30px; border-radius: 8px; box-shadow: 0 2px 8px rgba(0,0,0,0.08); margin-bottom: 20px; }
-.quiz-card.answer-incorrect { border: 2px solid var(--error); }
-.module-tag { display: inline-block; background: #e1dfdd; padding: 4px 12px; border-radius: 12px; font-size: 0.85rem; font-weight: 600; margin-bottom: 15px; }
-.question-text { font-size: 1.15rem; font-weight: 600; margin-bottom: 25px; line-height: 1.5; }
-.question-text.answer-incorrect { color: var(--error); }
-.options { display: flex; flex-direction: column; gap: 12px; }
-.option { padding: 15px; border: 2px solid #e1dfdd; border-radius: 6px; cursor: pointer; transition: all 0.2s; display: flex; align-items: flex-start; gap: 12px; }
-.option:hover:not(.disabled) { border-color: var(--primary); background: #f0f6ff; }
-.option.selected { border-color: var(--primary); background: #f0f6ff; }
-.option.correct { border-color: var(--success); background: #dff6dd; }
-.option.incorrect { border-color: var(--error); background: #fde7e9; }
-.option.disabled { cursor: default; opacity: 0.9; }
-.option-letter { font-weight: bold; min-width: 25px; color: var(--primary); }
-.option.correct .option-letter { color: var(--success); }
-.option.incorrect .option-letter { color: var(--error); }
-.feedback { margin-top: 25px; padding: 20px; border-radius: 6px; display: none; }
-.feedback.show { display: block; }
-.feedback.correct { background: #dff6dd; border: 1px solid var(--success); }
-.feedback.incorrect { background: #fde7e9; border: 1px solid var(--error); }
-.feedback-header { display: flex; align-items: center; justify-content: space-between; gap: 12px; }
-.feedback-title { font-weight: bold; font-size: 1.1rem; }
-.explanation-toggle { min-height: 36px; padding: 6px 12px; background: transparent; color: inherit; border: 1px solid currentColor; font-size: 0.9rem; }
-.explanation-toggle:hover { background: rgba(255,255,255,0.5); }
-.explanations.collapsed { display: none; }
-.explanation-item { margin-bottom: 12px; padding: 10px; background: rgba(255,255,255,0.6); border-radius: 4px; line-height: 1.4; }
-.explanation-item strong { display: block; margin-bottom: 4px; }
-.controls { margin-top: 25px; display: flex; justify-content: flex-end; align-items: center; flex-wrap: wrap; gap: 12px; }
-button { min-height: 44px; padding: 10px 24px; border: none; border-radius: 4px; font-size: 1rem; font-weight: 600; cursor: pointer; transition: background 0.2s; }
-.btn-primary { background: var(--primary); color: white; }
-.btn-primary:hover { background: #106ebe; }
-.btn-primary:disabled { background: #c8c6c4; cursor: not-allowed; }
-.btn-secondary { background: #edebe9; color: var(--text); }
-.btn-secondary:hover { background: #e1dfdd; }
-.hidden { display: none !important; }
-.results-card { text-align: center; padding: 40px; }
-.score-circle { width: 150px; height: 150px; border-radius: 50%; background: var(--primary); color: white; display: flex; flex-direction: column; justify-content: center; align-items: center; margin: 0 auto 30px; font-size: 2.5rem; font-weight: bold; }
-.module-breakdown { text-align: left; max-width: 600px; margin: 0 auto; background: #f8f9fa; padding: 20px; border-radius: 8px; }
-.module-breakdown h3 { margin-top: 0; }
-.module-row { display: flex; justify-content: space-between; padding: 8px 0; border-bottom: 1px solid #e1dfdd; }
-.save-status { color: #605e5c; font-size: 0.9rem; align-self: center; }
-@media (max-width: 600px) {
-  body { padding: 10px; }
-  .header, .quiz-card { padding: 18px; }
-  .header { gap: 12px; }
-  .header > div:first-child { width: 100%; }
-  .header h2 { font-size: 1.35rem; }
-  .module-selector { min-width: 100%; width: 100%; }
-  .module-selector select { width: 100%; }
-  .bank-selector { min-width: 100%; width: 100%; }
-  .bank-selector select { width: 100%; }
-  .stats { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 8px 14px; width: 100%; }
-  .stat-item { white-space: nowrap; }
-  .question-text { font-size: 1.05rem; margin-bottom: 20px; }
-  .option { padding: 14px 12px; gap: 10px; }
-  .feedback { padding: 15px; }
-  .feedback-header { align-items: flex-start; }
-  .explanation-toggle { flex-shrink: 0; }
-  .controls { justify-content: stretch; }
-  .save-status { width: 100%; order: -1; }
-  .controls button { flex: 1 1 calc(50% - 6px); padding-left: 12px; padding-right: 12px; }
-  .results-card { padding: 25px 18px; }
-  .module-breakdown { padding: 15px; }
-  .module-row { gap: 12px; align-items: flex-start; }
-  .module-row strong { text-align: right; }
-}
-</style>
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='8' fill='%233f56d8'/%3E%3Cpath d='M16 6l-8 3v6c0 4.5 3.4 8.3 8 9 4.6-.7 8-4.5 8-9V9l-8-3z' fill='none' stroke='white' stroke-width='2.4' stroke-linejoin='round'/%3E%3Cpath d='M12.5 15.5l2.5 2.5 4.5-4.5' fill='none' stroke='white' stroke-width='2.4' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="assets/site.css">
 </head>
-<body>
-<div class="container">
-  <div class="header" id="header">
-    <div>
-      <a href="index.html" style="font-size: 0.85rem; color: #605e5c; text-decoration: none;">&larr; All exams</a>
-      <h2 style="margin:4px 0 0;">SC-200 Practice Quiz</h2>
-      <div style="color: #605e5c; font-size: 0.9rem;">Microsoft Security Operations Analyst</div>
+<body class="theme-sc200">
+<header class="site-nav">
+  <div class="site-nav-inner">
+    <a class="site-brand" href="index.html"><span class="site-logo"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3 4 6v6c0 4.5 3.4 8.3 8 9 4.6-.7 8-4.5 8-9V6l-8-3Z"/><path d="m9 12 2 2 4-4"/></svg></span>Practice Hub</a>
+    <nav class="site-links"><a href="index.html#security-plus">Security+</a><a href="index.html#sc-200" class="active">SC-200</a></nav>
+    <div class="site-nav-end"></div>
+  </div>
+</header>
+
+<main class="container">
+  <div class="page-hero">
+    <div class="crumbs"><a href="index.html">Home</a><span>/</span><a href="index.html#sc-200">SC-200</a><span>/</span><span>Standard bank</span></div>
+    <div class="hero-row">
+      <div class="exam-badge">SC</div>
+      <div>
+        <h1>SC-200 Practice Quiz</h1>
+        <p>Microsoft Security Operations Analyst &middot; Standard bank, 906 questions</p>
+      </div>
     </div>
-    <div class="bank-selector">
-      <label for="bank-select">Question bank</label>
-      <select id="bank-select">
-        <option value="sc-200.html">Standard bank (906 questions)</option>
-        <option value="sc-200-advanced.html">Advanced bank (285 questions)</option>
-      </select>
+  </div>
+
+  <div class="toolbar" id="header">
+    <div class="toolbar-top">
+      <div class="seg" aria-label="Question bank">
+        <a href="sc-200.html" class="active">Standard<small>906</small></a>
+        <a href="sc-200-advanced.html">Advanced<small>285</small></a>
+      </div>
+      <div class="stats">
+        <div class="stat-item">Question<b><span id="current-q">1</span>/<span id="total-q">0</span></b></div>
+        <div class="stat-item good">Correct<b id="score-correct">0</b></div>
+        <div class="stat-item bad">Incorrect<b id="score-incorrect">0</b></div>
+        <div class="stat-item">Score<b id="score-percent">0%</b></div>
+      </div>
     </div>
-    <div class="module-selector">
-      <label for="module-select">Choose a module</label>
-      <select id="module-select">
-        <option value="all">All Modules</option>
-      </select>
-    </div>
-    <div class="stats">
-      <div class="stat-item">Q: <span id="current-q">1</span>/<span id="total-q">0</span></div>
-      <div class="stat-item" style="color: var(--success);">Correct: <span id="score-correct">0</span></div>
-      <div class="stat-item" style="color: var(--error);">Incorrect: <span id="score-incorrect">0</span></div>
-      <div class="stat-item">Score: <span id="score-percent">0%</span></div>
+    <div class="filters">
+      <div class="filter-group">
+        <label for="module-select">Module</label>
+        <select id="module-select"><option value="all">All Modules</option></select>
+      </div>
     </div>
     <div class="progress-bar"><div class="progress-fill" id="progress-fill"></div></div>
   </div>
 
   <div class="quiz-card" id="quiz-container">
-    <div class="module-tag" id="module-tag"></div>
+    <div class="tag-row"><span class="tag module-tag" id="module-tag"></span></div>
     <div class="question-text" id="question-text"></div>
     <div class="options" id="options-container"></div>
     <div class="feedback" id="feedback-container">
@@ -131,31 +65,36 @@ button { min-height: 44px; padding: 10px 24px; border: none; border-radius: 4px;
       <div class="explanations collapsed" id="explanations-container"></div>
     </div>
     <div class="controls">
+      <button class="btn-ghost" id="save-btn" type="button">Save Progress</button>
       <span class="save-status" id="save-status" role="status" aria-live="polite"></span>
-      <button class="btn-primary" id="save-btn" type="button">Save Progress</button>
+      <span class="spacer"></span>
+      <button class="btn-secondary" id="previous-btn" type="button">Previous</button>
+      <button class="btn-secondary" id="skip-btn" type="button">Skip</button>
       <button class="btn-primary" id="check-btn" disabled>Check Answer</button>
-      <button class="btn-secondary" id="skip-btn" type="button">Skip Question</button>
-      <button class="btn-secondary" id="previous-btn" type="button">Previous Question</button>
       <button class="btn-primary hidden" id="next-btn">Next Question</button>
     </div>
   </div>
 
   <div class="quiz-card results-card hidden" id="results-container">
+    <div class="status-pill completed">Completed</div>
     <h2>Quiz Completed!</h2>
     <div class="score-circle">
       <span id="final-percent">0%</span>
-      <small style="font-size: 1rem; font-weight: normal; opacity: 0.9;">Final Score</small>
+      <small style="font-size: 0.9rem; font-weight: 500; opacity: 0.9;">Final Score</small>
     </div>
-    <p style="font-size: 1.1rem; margin-bottom: 30px;">
+    <p style="font-size: 1.05rem; margin: 0 0 26px; color: var(--muted);">
       You answered <strong id="final-correct">0</strong> out of <strong id="final-total">0</strong> questions correctly.
     </p>
     <div class="module-breakdown" id="module-breakdown">
       <h3>Module Performance</h3>
       <div id="module-rows"></div>
     </div>
-    <button class="btn-primary" style="margin-top: 30px;" onclick="restartQuiz()">Restart Quiz</button>
+    <div class="result-actions" style="margin-top: 24px;">
+      <a class="btn btn-secondary" href="index.html">All exams</a>
+      <button class="btn-primary" onclick="restartQuiz()">Restart Quiz</button>
+    </div>
   </div>
-</div>
+</main>
 
 <script>
 const questions = [
@@ -1499,7 +1438,7 @@ function loadQuestion() {
   q.o.forEach((opt, index) => {
     const div = document.createElement('div');
     div.className = 'option';
-    div.innerHTML = `<span class="option-letter">${String.fromCharCode(65 + index)}.</span> <span>${opt.substring(3)}</span>`;
+    div.innerHTML = `<span class="option-letter">${String.fromCharCode(65 + index)}</span> <span>${opt.substring(3)}</span>`;
     div.onclick = () => selectOption(index, div);
     if (!answered && selectedOption === index) div.classList.add('selected');
     optionsContainer.appendChild(div);
@@ -1676,10 +1615,6 @@ function restartQuiz() {
 document.getElementById('module-select').addEventListener('change', event => {
   selectedModule = event.target.value;
   restartQuiz();
-});
-document.getElementById('bank-select').value = 'sc-200.html';
-document.getElementById('bank-select').addEventListener('change', event => {
-  window.location.href = event.target.value;
 });
 document.getElementById('check-btn').addEventListener('click', checkAnswer);
 document.getElementById('skip-btn').addEventListener('click', skipQuestion);

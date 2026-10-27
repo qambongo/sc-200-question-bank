@@ -163,16 +163,15 @@ for q in merged:
 
 PAGES = [
     {'src': 'CompTIA', 'file': 'security-plus-topics.html', 'title': 'Security+ by Topic', 'badge': 'S+',
-     'subtitle': 'SY0-701 &middot; Questions grouped by exam objective &middot; Pick a short set to practice',
-     'colors': None},
+     'theme': 'theme-comptia', 'crumb': 'CompTIA bank &middot; By topic',
+     'subtitle': 'CompTIA question bank &middot; 864 questions grouped by SY0-701 objective. Pick a short set to practice.'},
     {'src': 'Dion', 'file': 'dion-security-plus-topics.html', 'title': 'Dion Security+ by Topic', 'badge': 'D',
-     'subtitle': 'SY0-701 &middot; Jason Dion practice exam questions grouped by exam objective &middot; Pick a short set to practice',
-     'colors': ('#6b4fbb', '#4d3d8d', '#f4f0ff')},
+     'theme': 'theme-dion', 'crumb': 'Dion bank &middot; By topic',
+     'subtitle': 'Jason Dion question bank &middot; 540 questions grouped by SY0-701 objective. Pick a short set to practice.'},
 ]
 
-base = open(os.path.join(root, 'security-plus.html'), encoding='utf-8').read()
-base_css = base[base.index('<style>') + len('<style>'):base.index('</style>')]
 template = open(os.path.join(root, 'scripts', 'topics_template.html'), encoding='utf-8').read()
+banks = {}  # question ids per bank, used by the hub to show progress
 
 for page in PAGES:
     bank = [q for q in merged if q['src'] == page['src']]
@@ -193,16 +192,16 @@ for page in PAGES:
         'const OBJECTIVES = ' + json.dumps(objectives, indent=1) + ';\n'
         'const questions = [\n' + ',\n'.join(json.dumps(q, ensure_ascii=False).replace('<', '\\u003c') for q in bank) + '\n];\n'
     )
-    out = template.replace('/*__BASE_CSS__*/', base_css)
-    if page['colors']:
-        primary, dark, tint = page['colors']
-        out = out.replace('--primary: #C8102E;', f'--primary: {primary};').replace('--primary-dark: #9c0c22;', f'--primary-dark: {dark};')
-        out = out.replace('#fff5f5', tint)
-    for k in ('title', 'badge', 'subtitle'):
+    out = template
+    for k in ('title', 'badge', 'subtitle', 'theme', 'crumb'):
         out = out.replace(f'__{k.upper()}__', page[k])
     out = out.replace('/*__DATA__*/', data)
     open(os.path.join(root, page['file']), 'w', encoding='utf-8').write(out)
 
+    banks[page['src']] = [q['id'] for q in bank]
     print(page['file'], len(bank), 'questions in', sum(len(o['sets']) for o in objectives), 'sets')
     for o in objectives:
         print(f"  {o['id']} {o['short']:<34} {sum(map(len, o['sets'])):>3} q, {len(o['sets'])} sets")
+
+with open(os.path.join(root, 'assets', 'banks.json'), 'w', encoding='utf-8') as f:
+    json.dump(banks, f, separators=(',', ':'))
