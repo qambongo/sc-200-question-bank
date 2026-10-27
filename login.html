@@ -1,0 +1,90 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Sign in · Practice Hub</title>
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='8' fill='%233f56d8'/%3E%3Cpath d='M16 6l-8 3v6c0 4.5 3.4 8.3 8 9 4.6-.7 8-4.5 8-9V9l-8-3z' fill='none' stroke='white' stroke-width='2.4' stroke-linejoin='round'/%3E%3Cpath d='M12.5 15.5l2.5 2.5 4.5-4.5' fill='none' stroke='white' stroke-width='2.4' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="assets/site.css">
+<style>
+body { min-height: 100vh; display: flex; align-items: center; justify-content: center; padding: 24px 16px;
+  background: radial-gradient(1200px 600px at 10% -10%, color-mix(in srgb, #2f5bea 12%, transparent), transparent 60%),
+              radial-gradient(900px 500px at 110% 110%, color-mix(in srgb, #6b4fbb 12%, transparent), transparent 60%), var(--bg); }
+.login { width: 100%; max-width: 400px; }
+.login-brand { display: flex; flex-direction: column; align-items: center; gap: 14px; margin-bottom: 22px; text-align: center; }
+.login-brand .site-logo { width: 52px; height: 52px; border-radius: 15px; box-shadow: 0 10px 28px rgba(63, 86, 216, 0.3); }
+.login-brand .site-logo svg { width: 28px; height: 28px; }
+.login-brand h1 { margin: 0; font-size: 1.5rem; font-weight: 800; }
+.login-brand p { margin: 4px 0 0; color: var(--muted); font-size: 0.95rem; }
+.login form { padding: 26px; }
+.login label { display: block; margin: 0 0 6px; }
+.login input { width: 100%; margin-bottom: 16px; }
+.login button { width: 100%; margin-top: 4px; min-height: 46px; }
+.form-error { color: var(--error); font-size: 0.88rem; min-height: 1.3em; margin: -6px 0 8px; }
+.login-foot { text-align: center; color: var(--faint); font-size: 0.82rem; margin-top: 18px; }
+</style>
+</head>
+<body>
+<main class="login">
+  <div class="login-brand">
+    <span class="site-logo"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3 4 6v6c0 4.5 3.4 8.3 8 9 4.6-.7 8-4.5 8-9V6l-8-3Z"/><path d="m9 12 2 2 4-4"/></svg></span>
+    <div>
+      <h1>Practice Hub</h1>
+      <p>Sign in to continue to your practice questions</p>
+    </div>
+  </div>
+  <form class="card" id="login-form" novalidate>
+    <label for="username">Username</label>
+    <input id="username" name="username" autocomplete="username" autocapitalize="none" spellcheck="false" required autofocus>
+    <label for="password">Password</label>
+    <input id="password" name="password" type="password" autocomplete="current-password" required>
+    <div class="form-error" id="error" role="alert"></div>
+    <button class="btn-primary" id="submit" type="submit">Sign in</button>
+  </form>
+  <p class="login-foot">CompTIA Security+ &middot; Microsoft SC-200</p>
+</main>
+<script>
+function destination() {
+  const next = new URLSearchParams(location.search).get('next') || '/';
+  return next.startsWith('/') && !next.startsWith('//') && !next.startsWith('/\\') ? next : '/';
+}
+
+fetch('/api/auth', { credentials: 'same-origin' })
+  .then(r => r.json())
+  .then(me => { if (me.username) location.replace(destination()); })
+  .catch(() => {});
+
+document.getElementById('login-form').addEventListener('submit', async e => {
+  e.preventDefault();
+  const error = document.getElementById('error');
+  const submit = document.getElementById('submit');
+  error.textContent = '';
+  submit.disabled = true;
+  submit.textContent = 'Signing in…';
+  try {
+    const res = await fetch('/api/auth', {
+      method: 'POST',
+      credentials: 'same-origin',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        action: 'login',
+        username: document.getElementById('username').value,
+        password: document.getElementById('password').value,
+      }),
+    });
+    const data = await res.json().catch(() => ({}));
+    if (!res.ok) throw new Error(data.error || 'Sign-in failed, please try again.');
+    location.replace(destination());
+  } catch (err) {
+    error.textContent = err.message;
+    document.getElementById('password').select();
+    submit.disabled = false;
+    submit.textContent = 'Sign in';
+  }
+});
+</script>
+</body>
+</html>

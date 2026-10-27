@@ -2,3 +2,5 @@
 .DS_Store
 .vercel
 .vscode/
+.env*.local
+node_modules/

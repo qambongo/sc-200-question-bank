@@ -42,13 +42,10 @@
 .mode-progress small { color: var(--muted); font-size: 0.78rem; }
 .chev { flex-shrink: 0; width: 18px; height: 18px; color: var(--faint); transition: transform 0.15s, color 0.15s; }
 .mode-body .badge-new { display: inline-block; margin-left: 6px; padding: 1px 7px; border-radius: 999px; font-size: 0.68rem; font-weight: 700; background: var(--success-bg); color: var(--success); vertical-align: 1px; }
-.user-chip { display: inline-flex; align-items: center; gap: 8px; font-size: 0.85rem; color: var(--muted); }
-.user-chip .avatar { width: 28px; height: 28px; border-radius: 50%; display: grid; place-items: center; background: var(--surface-3); color: var(--text); font-weight: 700; font-size: 0.8rem; text-transform: uppercase; }
 @media (max-width: 640px) {
   .hub-hero { padding: 32px 0 24px; }
   .bank-grid { grid-template-columns: 1fr; }
   .bank-card { padding: 18px; }
-  .user-chip .name { display: none; }
 }
 </style>
 </head>
@@ -57,9 +54,10 @@
   <div class="site-nav-inner">
     <a class="site-brand" href="index.html"><span class="site-logo"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3 4 6v6c0 4.5 3.4 8.3 8 9 4.6-.7 8-4.5 8-9V6l-8-3Z"/><path d="m9 12 2 2 4-4"/></svg></span>Practice Hub</a>
     <nav class="site-links"><a href="#security-plus">Security+</a><a href="#sc-200">SC-200</a></nav>
-    <div class="site-nav-end" id="nav-user"></div>
+    <div class="site-nav-end"></div>
   </div>
 </header>
+<script src="assets/session.js"></script>
 
 <main class="container">
   <section class="hub-hero">
@@ -179,27 +177,13 @@
     </div>
   </section>
 
-  <footer class="site-footer">Sign in on a "Study by topic" page to keep your progress across devices.</footer>
+  <footer class="site-footer">Progress on the "Study by topic" pages is saved to your account.</footer>
 </main>
 
 <script>
 /* Shows each topic bank's saved progress on its card. Progress maps question id -> "1:<ts>" / "0:<ts>". */
 function loadLocal(key) {
   try { return JSON.parse(localStorage.getItem(key) || '{}') || {}; } catch (e) { return {}; }
-}
-
-function renderUser(username) {
-  const el = document.getElementById('nav-user');
-  const chip = document.createElement('span');
-  chip.className = 'user-chip';
-  const avatar = document.createElement('span');
-  avatar.className = 'avatar';
-  avatar.textContent = username.charAt(0);
-  const name = document.createElement('span');
-  name.className = 'name';
-  name.textContent = username;
-  chip.append(avatar, name);
-  el.append(chip);
 }
 
 function renderProgress(progress, banks) {
@@ -222,18 +206,15 @@ function renderProgress(progress, banks) {
 }
 
 (async () => {
+  const username = await window.sessionUser;
   let banks;
   try { banks = await (await fetch('assets/banks.json')).json(); } catch (e) { return; }
-  let progress = loadLocal('sp-topics-progress:guest');
+  if (!username) return;
+  let progress = loadLocal('sp-topics-progress:' + username);
+  renderProgress(progress, banks);
   try {
-    const me = await (await fetch('/api/auth', { credentials: 'same-origin' })).json();
-    if (me.username) {
-      renderUser(me.username);
-      progress = loadLocal('sp-topics-progress:' + me.username);
-      renderProgress(progress, banks);
-      const res = await fetch('/api/progress', { credentials: 'same-origin' });
-      if (res.ok) progress = (await res.json()).progress || progress;
-    }
+    const res = await fetch('/api/progress', { credentials: 'same-origin' });
+    if (res.ok) progress = (await res.json()).progress || progress;
   } catch (e) {}
   renderProgress(progress, banks);
 })();

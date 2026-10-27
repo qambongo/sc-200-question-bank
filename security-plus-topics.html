@@ -10,15 +10,8 @@
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="assets/site.css">
 <style>
-/* Account controls (top bar) */
-.account { display: flex; align-items: center; gap: 10px; }
-.user-chip { display: inline-flex; align-items: center; gap: 8px; font-size: 0.88rem; font-weight: 600; }
-.user-chip .avatar { width: 28px; height: 28px; border-radius: 50%; display: grid; place-items: center; background: var(--accent-soft-2); color: var(--accent); font-weight: 700; font-size: 0.8rem; text-transform: uppercase; }
 
 /* Dialog extras */
-.tabs { display: flex; gap: 4px; background: var(--surface-2); border: 1px solid var(--border); border-radius: 10px; padding: 4px; margin-bottom: 16px; }
-.tabs button { flex: 1; min-height: 36px; padding: 6px; background: transparent; color: var(--muted); font-size: 0.9rem; border-radius: 7px; }
-.tabs button.active { background: var(--surface); color: var(--text); box-shadow: var(--shadow-sm); }
 .set-modes { display: flex; flex-direction: column; gap: 8px; margin-top: 16px; }
 .set-modes button { width: 100%; justify-content: space-between; min-height: 48px; }
 .set-modes button span { font-weight: 500; font-size: 0.84rem; opacity: 0.8; }
@@ -73,7 +66,6 @@
   .overview-actions { justify-content: stretch; }
   .overview-actions button { flex: 1; }
   .domain-progress { display: none; }
-  .user-chip .name { display: none; }
 }
 </style>
 </head>
@@ -82,7 +74,7 @@
   <div class="site-nav-inner">
     <a class="site-brand" href="index.html"><span class="site-logo"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3 4 6v6c0 4.5 3.4 8.3 8 9 4.6-.7 8-4.5 8-9V6l-8-3Z"/><path d="m9 12 2 2 4-4"/></svg></span>Practice Hub</a>
     <nav class="site-links"><a href="index.html#security-plus" class="active">Security+</a><a href="index.html#sc-200">SC-200</a></nav>
-    <div class="site-nav-end account" id="account"></div>
+    <div class="site-nav-end" id="account"></div>
   </div>
 </header>
 
@@ -192,26 +184,6 @@
     <div id="review-list"></div>
   </div>
 </main>
-
-<!-- SIGN-IN DIALOG -->
-<div class="overlay hidden" id="auth-overlay">
-  <form class="dialog" id="auth-form" novalidate>
-    <div class="tabs">
-      <button type="button" class="active" data-mode="login">Sign in</button>
-      <button type="button" data-mode="register">Create account</button>
-    </div>
-    <p id="auth-intro">Sign in to save your progress and pick up where you left off on any device.</p>
-    <label for="auth-username">Username</label>
-    <input id="auth-username" autocomplete="username" maxlength="32" required>
-    <label for="auth-password">Password</label>
-    <input id="auth-password" type="password" autocomplete="current-password" maxlength="200" required>
-    <div class="form-error" id="auth-error" role="alert"></div>
-    <div class="dialog-actions">
-      <button type="button" class="btn-secondary" id="auth-cancel">Cancel</button>
-      <button type="submit" class="btn-primary" id="auth-submit">Sign in</button>
-    </div>
-  </form>
-</div>
 
 <!-- SET DIALOG -->
 <div class="overlay hidden" id="set-overlay">
@@ -2381,7 +2353,7 @@ async function flushPending(keepalive = false) {
   } catch (e) {
     pending = { ...batch, ...pending };
     syncState = 'error';
-    if (e.status === 401) { user = null; progress = loadLocal(storageKey()); renderTopics(); }
+    if (e.status === 401) { location.href = 'login.html?next=' + encodeURIComponent(location.pathname); return; }
   }
   renderAccount();
 }
@@ -2417,7 +2389,7 @@ async function initAccount() {
       progress = loadLocal(storageKey());
       renderAccount();
       renderTopics();
-      await loadServerProgress(false);
+      await loadServerProgress(true);
     } else {
       progress = loadLocal(storageKey());
       syncState = 'local';
@@ -2458,75 +2430,16 @@ function renderAccount() {
       note.textContent = Object.keys(pending).length ? 'Saving…' : `Progress synced to ${user.username}'s account`;
       note.classList.add('ok');
     }
-  } else if (syncState === 'offline') {
-    note.textContent = 'Accounts are unavailable here, so progress is saved on this device only.';
   } else {
-    const btn = document.createElement('button');
-    btn.className = 'btn-primary btn-sm';
-    btn.textContent = 'Sign in';
-    btn.onclick = () => openAuth('login');
-    el.append(btn);
-    note.textContent = 'Progress is saved on this device only. Sign in to keep it across devices.';
-    const create = document.createElement('button');
-    create.className = 'btn-secondary btn-sm';
-    create.textContent = 'Create account';
-    create.onclick = () => openAuth('register');
-    note.append(create);
-  }
-}
-
-let authMode = 'login';
-function openAuth(mode) {
-  setAuthMode(mode);
-  document.getElementById('auth-error').textContent = '';
-  document.getElementById('auth-password').value = '';
-  document.getElementById('auth-overlay').classList.remove('hidden');
-  document.getElementById('auth-username').focus();
-}
-function closeAuth() { document.getElementById('auth-overlay').classList.add('hidden'); }
-function setAuthMode(mode) {
-  authMode = mode;
-  document.querySelectorAll('#auth-form .tabs button').forEach(b => b.classList.toggle('active', b.dataset.mode === mode));
-  document.getElementById('auth-submit').textContent = mode === 'login' ? 'Sign in' : 'Create account';
-  document.getElementById('auth-password').autocomplete = mode === 'login' ? 'current-password' : 'new-password';
-  document.getElementById('auth-intro').textContent = mode === 'login'
-    ? 'Sign in to save your progress and pick up where you left off on any device.'
-    : 'Choose a username (3-32 letters, numbers, . _ -) and a password of at least 8 characters. Progress from this device is carried over.';
-}
-
-async function submitAuth(e) {
-  e.preventDefault();
-  const username = document.getElementById('auth-username').value.trim();
-  const password = document.getElementById('auth-password').value;
-  const errEl = document.getElementById('auth-error');
-  const submit = document.getElementById('auth-submit');
-  errEl.textContent = '';
-  submit.disabled = true;
-  try {
-    const data = await api('/api/auth', { method: 'POST', body: JSON.stringify({ action: authMode, username, password }) });
-    user = { username: data.username };
-    closeAuth();
-    await loadServerProgress(true);
-  } catch (err) {
-    errEl.textContent = err.message;
-    if (user) syncState = 'error';
-  } finally {
-    submit.disabled = false;
-    renderAccount();
-    renderTopics();
+    note.textContent = 'Could not reach your account, so progress is saved on this device only for now.';
+    note.classList.add('error');
   }
 }
 
 async function signOut() {
   await flushPending();
   try { await api('/api/auth', { method: 'POST', body: JSON.stringify({ action: 'logout' }) }); } catch (e) {}
-  try { localStorage.removeItem(storageKey()); } catch (e) {}
-  user = null;
-  pending = {};
-  progress = loadLocal(storageKey());
-  syncState = 'local';
-  renderAccount();
-  renderTopics();
+  location.href = 'login.html';
 }
 
 async function resetProgress() {
@@ -3141,11 +3054,8 @@ document.getElementById('review-wrong-btn').addEventListener('click', () => {
   const wrong = questions.filter(q => progress[q.id] && progress[q.id][0] === '0').map(q => q.id);
   if (wrong.length) startSession(wrong, 'All incorrect answers', null);
 });
-document.querySelectorAll('#auth-form .tabs button').forEach(b => { b.onclick = () => setAuthMode(b.dataset.mode); });
-document.getElementById('auth-form').addEventListener('submit', submitAuth);
-document.getElementById('auth-cancel').addEventListener('click', closeAuth);
 document.getElementById('set-cancel').addEventListener('click', closeSet);
-document.addEventListener('keydown', e => { if (e.key === 'Escape') { closeAuth(); closeSet(); } });
+document.addEventListener('keydown', e => { if (e.key === 'Escape') closeSet(); });
 document.addEventListener('visibilitychange', () => { if (document.visibilityState === 'hidden') flushPending(true); });
 
 renderTopics();

@@ -1,0 +1,7 @@
+{
+  "name": "sc-200-question-bank",
+  "private": true,
+  "dependencies": {
+    "@vercel/functions": "3.9.11"
+  }
+}

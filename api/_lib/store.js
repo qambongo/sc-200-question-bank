@@ -29,7 +29,8 @@ function parseCookies(header) {
   const out = {};
   (header || '').split(';').forEach(part => {
     const i = part.indexOf('=');
-    if (i > 0) out[part.slice(0, i).trim()] = decodeURIComponent(part.slice(i + 1).trim());
+    if (i <= 0) return;
+    try { out[part.slice(0, i).trim()] = decodeURIComponent(part.slice(i + 1).trim()); } catch (e) {}
   });
   return out;
 }
@@ -43,10 +44,33 @@ function sessionToken(req) {
   return token && /^[a-f0-9]{64}$/.test(token) ? token : null;
 }
 
+// The site has one account, set with the SITE_USERNAME and SITE_PASSWORD environment variables.
+function siteAccount() {
+  const username = process.env.SITE_USERNAME;
+  const password = process.env.SITE_PASSWORD;
+  if (!username || !password) throw Object.assign(new Error('Sign-in is not configured'), { status: 503 });
+  return { username, password };
+}
+
+function sameSecret(a, b) {
+  const digest = v => crypto.createHash('sha256').update(String(v)).digest();
+  return crypto.timingSafeEqual(digest(a), digest(b));
+}
+
+function checkCredentials(username, password) {
+  const account = siteAccount();
+  const userOk = sameSecret(username, account.username);
+  const passOk = sameSecret(password, account.password);
+  return userOk && passOk ? account.username : null;
+}
+
+// Sessions are only honoured for the configured account, so sessions from
+// older self-registered accounts stop working.
 async function currentUser(req) {
   const token = sessionToken(req);
   if (!token) return null;
-  return (await redis('GET', `session:${token}`)) || null;
+  const username = await redis('GET', `session:${token}`);
+  return username && username === siteAccount().username ? username : null;
 }
 
 async function createSession(res, username) {
@@ -59,12 +83,6 @@ async function destroySession(req, res) {
   const token = sessionToken(req);
   if (token) await redis('DEL', `session:${token}`);
   res.setHeader('Set-Cookie', sessionCookie('', 0));
-}
-
-function hashPassword(password, salt) {
-  return new Promise((resolve, reject) => {
-    crypto.scrypt(password, salt, 64, (err, key) => (err ? reject(err) : resolve(key.toString('hex'))));
-  });
 }
 
 function send(res, status, body) {
@@ -83,4 +101,4 @@ function handler(fn) {
   };
 }
 
-module.exports = { redis, currentUser, createSession, destroySession, hashPassword, send, handler };
+module.exports = { redis, currentUser, checkCredentials, createSession, destroySession, send, handler };

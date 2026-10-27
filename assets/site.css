@@ -126,6 +126,8 @@ h1, h2, h3, h4 { letter-spacing: -0.015em; line-height: 1.25; }
 .site-links a:hover { color: var(--text); background: var(--surface-2); }
 .site-links a.active { color: var(--text); background: var(--surface-3); }
 .site-nav-end { margin-left: auto; display: flex; align-items: center; gap: 10px; }
+.user-chip { display: inline-flex; align-items: center; gap: 8px; font-size: 0.88rem; font-weight: 600; color: var(--text); }
+.user-chip .avatar { width: 28px; height: 28px; border-radius: 50%; display: grid; place-items: center; background: var(--accent-soft-2); color: var(--accent); font-weight: 700; font-size: 0.8rem; text-transform: uppercase; }
 
 /* ---------- Page hero ---------- */
 .page-hero { padding: 28px 0 24px; }
@@ -399,6 +401,7 @@ label { font-size: 0.82rem; font-weight: 600; color: var(--muted); }
   .container { padding: 0 16px 48px; }
   .site-nav-inner { padding: 0 16px; gap: 12px; }
   .site-links { display: none; }
+  .user-chip .name { display: none; }
   .page-hero { padding: 20px 0 18px; }
   .exam-badge { width: 44px; height: 44px; border-radius: 12px; font-size: 0.95rem; }
   .quiz-card { padding: 20px 18px; }
